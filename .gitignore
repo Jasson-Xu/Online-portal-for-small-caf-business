@@ -3,7 +3,7 @@
 !/var/.gitkeep
 /node_modules/
 /.tools/
-/dist/
+
 /artifacts/
 /.env
 *.log
