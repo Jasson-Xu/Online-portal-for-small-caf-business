@@ -1,48 +1,92 @@
-# Test report
+# Test plan and results 2026
 
-Execution date: 6 October 2026. Environment: Windows, PHP 8.4.0, MySQL 9.1.0, local HTTP server bound to 127.0.0.1:8080. A separate project database on port 3307 was used; the existing WAMP databases were not modified. Synthetic accounts and orders were used throughout.
+## Purpose and acceptance basis
 
-## Executed verification
+This document records the test approach and results for the Folks & Co. café portal in ICT312 Assignment 2, 2026. The acceptance goal is a working local system that supports the proposal's customer and staff journeys, protects account and order data, and can be installed on XAMPP. The tests demonstrate prototype behaviour; they are not evidence of a production payment service, a live café trial or formal security certification.
 
-| Suite | Result | Coverage |
+The release is acceptable for the local demonstration when a fresh installation opens the menu, a customer can register and place a simulated order, the receipt and tracking page show that order, staff can progress it through valid states, and the documented data and access checks pass. A critical privacy or order-integrity failure blocks handover until corrected and retested.
+
+## Test strategy and environment
+
+Tests are divided into domain rules, HTTP integration, database integrity, browser behaviour, failure recovery and XAMPP installation. Domain tests check pure rules; integration tests exercise real requests and database writes; browser tests check the customer and staff journeys at desktop and narrow mobile widths. Failure tests deliberately break payment storage in a disposable database to verify rollback. Manual installation checks cover SQL import, Apache access rules and staff sign-in.
+
+The main automated test evidence was recorded on 6 October 2026 using Windows, PHP 8.4, MySQL 9.1 and a local PHP server at `127.0.0.1:8080` with a separate test database. XAMPP checks used PHP 8.2 and MariaDB 10.4. Synthetic accounts and orders were used. The checked-in JSON files under `docs/evidence/` record the integration, browser and failure suites; they contain test identifiers rather than real customer data.
+
+| Level | Test data and method | Exit condition |
 |---|---|---|
-| PHP syntax | All PHP application and setup files passed | Parse errors |
-| Domain rules | 23 passed | Quantity bounds, phone formats, slot lead time/horizon and terminal states |
-| HTTP integration | 48 passed | Registration, login, roles, CSRF, menu, group bag, validation, checkout, replay, receipts, privacy, staff lifecycle, refunds, catalogue updates and throttling |
-| Database integrity | 8 passed | Password hashes, foreign relationships, price snapshots, payment totals, refund states, booked capacity, audit events and absence of card columns |
-| Browser workflow in Chrome | 23 passed | Real form submissions, group ordering, checkout, staff sign-in, no JavaScript errors, 320/390 pixel page widths |
-| Browser workflow in Edge | 23 passed | Same browser workflow and responsive checks in a second installed browser |
-| Failure recovery | 4 passed | Full collection slot, payment-storage rollback, preserved cart and recovery |
-| XAMPP installation | Passed | PHP 8.2 and MariaDB 10.4, fresh dedicated database user, repeat setup, Apache junction, home/menu/CSS via `/cafe/` |
-| Manual XAMPP SQL import | Passed | Three ordered SQL files imported through XAMPP MariaDB; 12 menu items and bcrypt staff password verified; existing order retained; manual Apache layout served `public/` and denied source files |
+| Domain | Boundary values for quantities, phone numbers, pickup slots and order states. | Every expected acceptance and rejection passes. |
+| HTTP integration | Disposable accounts, bag and checkout requests, ownership and staff actions. | Customer-to-staff journey and negative paths pass. |
+| Database integrity | Queries over order, payment, slot, event and password records. | No broken relationship or mismatched total is found. |
+| Browser | Chrome and Edge, desktop and 320/390-pixel layouts. | Main forms work and no horizontal overflow or JavaScript error appears. |
+| Failure recovery | Full slot and injected payment-write failure in a disposable database. | No partial order and retry succeeds after recovery. |
+| Installation | XAMPP automatic setup and three manual SQL imports. | Menu and staff login work; source folders are blocked by Apache. |
 
-The browser checks detect horizontal overflow and exercise a real order. Screenshots were also inspected for visual layout. They are not a claim of formal accessibility certification. Firefox, Safari, physical phones, a public HTTPS deployment, Docker startup and MySQL 8.4 were not executed in this environment. The installation options must be rehearsed on the actual marker's machine.
+## Acceptance cases and traceability
 
-The XAMPP setup was also exercised on the installed Windows XAMPP stack. A clean setup created a dedicated application account; a repeat run retained existing records. Apache served the linked public folder at `/cafe/` with HTTP 200 for the home page, menu and stylesheet. The local demo staff password was reset to the requested value on setup; HTTP sign-in reached the Staff desk, and the previous password was rejected. A custom XAMPP location or administrator password was not exercised.
+The following cases connect the design requirements to observable outcomes. Each case was exercised in the named suite unless noted as a manual installation check.
 
-The manual import SQL was run twice in order against the existing XAMPP database: all 12 sample items were present, the demo staff hash verified against the documented password, and the existing order count remained one. A temporary project-root link under `htdocs` checked the documented manual layout: `public/` returned HTTP 200 while `app/actions.php`, `config/config.php`, and `README.md` returned HTTP 403. The temporary link was removed after the check. A clean phpMyAdmin browser import on another computer has not been rehearsed.
+| Case | Design requirement | Expected outcome | Evidence |
+|---|---|---|---|
+| T01 Menu and search | F1 | Seeded products, categories, prices and search results display. | HTTP and browser passes. |
+| T02 Group bag | F2 | Two flat whites for one recipient total $9.60; edits and removal recalculate. | HTTP and browser passes. |
+| T03 Registration and roles | F3, Q1 | Customer registration succeeds without staff privileges; staff pages reject customers. | HTTP pass. |
+| T04 Input validation | F2–F4 | Invalid email, phone, quantity, product and slot are rejected without a new order. | Domain and HTTP passes. |
+| T05 Approved simulation | F4, Q2, Q5 | One order, payment record and first event are stored; no card fields are requested. | HTTP and database passes. |
+| T06 Declined simulation | F4, Q5 | No order or payment is created and the bag remains. | HTTP pass. |
+| T07 Duplicate submission | F4, Q2 | Replaying a successful checkout returns the original receipt. | HTTP pass. |
+| T08 Customer privacy | F5, Q1 | Another account's reference returns 404 without revealing a phone number. | HTTP pass. |
+| T09 Staff lifecycle | F6 | Valid state sequence works; a skipped transition is rejected. | HTTP and browser passes. |
+| T10 Cancellation | F6, Q2 | An eligible order is cancelled, refunded in simulation and removed from slot count. | HTTP and database passes. |
+| T11 Catalogue history | F1, F6 | Marking an item unavailable blocks new orders; old receipt prices remain. | HTTP pass. |
+| T12 Recovery | Q2 | Full slot or payment-write error leaves no partial order; retry succeeds. | Failure suite, four passes. |
+| T13 XAMPP handover | Q3 | Ordered SQL import creates 12 items and staff login; source URLs return 403. | Manual XAMPP check. |
+| T14 Responsive interface | Q4 | Main pages fit 320- and 390-pixel viewports in two browsers. | Browser passes. |
 
-## Representative acceptance cases
+## Executed results
 
-| Case | Expected outcome | Actual evidence |
+| Suite | Result | Key coverage |
 |---|---|---|
-| Add two flat whites for Rudesh | Correct group label and $9.60 total | Integration pass; persisted receipt |
-| Submit a fake client price or changed expected total | Server uses catalogue and rejects mismatch | Integration pass |
-| Select declined demo payment | No order/payment created; bag retained | Integration pass |
-| Replay successful checkout | Original receipt returned, no duplicate order | Integration pass |
-| Open another customer's reference | 404 with no customer phone | Integration pass |
-| Access staff as customer | 403, no mutation | Integration pass |
-| Skip from received to collected | Transition rejected | Integration pass |
-| Cancel a preparing/received order | Simulated refund, released capacity | Integration and database pass |
-| Mark a menu item unavailable | Sold-out state and server rejection | Integration pass |
-| Update catalogue price after purchase | Historical receipt unchanged | Integration pass |
+| PHP syntax | Passed | Application and setup files parsed without errors. |
+| Domain rules | 23 passed | Quantity, phone, collection-time and status boundaries. |
+| HTTP integration | 48 passed | Customer flow, access control, CSRF, checkout, replay, staff flow and menu edits. |
+| Database integrity | 8 passed | Hashes, links, totals, payment states, capacity, events and absence of card columns. |
+| Chrome browser | 23 passed | Forms, group checkout, staff sign-in, responsive widths and JavaScript errors. |
+| Edge browser | 23 passed | Same workflow and responsive checks in a second installed browser. |
+| Failure recovery | 4 passed | Full slot, rollback, bag retention and successful retry. |
+| XAMPP automatic setup | Passed | New account, repeat run, linked public folder and local staff login. |
+| Manual SQL import | Passed | Files imported twice; 12 items, valid staff hash and one existing order retained. |
+| Apache source access | Passed | `public/` returned 200; `app/`, `config/` and README requests returned 403. |
 
-## Observed defects corrected
+The checked-in integration result is `docs/evidence/integration-results.json`; browser results are `browser-results-chrome.json` and `browser-results-msedge.json`; the failure record is `failure-results.json`. Each includes an execution time and its completed checks. Database and domain scripts print their result directly and can be rerun as described below.
 
-The first visual inspection found that the decorative hero stamp was too close to the curved illustration edge; it was repositioned and the browser screenshots regenerated. A test-query string accidentally interpolated the Argon2 prefix; the dollar signs were escaped and database verification repeated. Neither issue changed stored customer orders.
+## Defect recording and retest
 
-## Reproduction and limitations
+During visual review, the home-page illustration stamp was moved away from a curved edge and browser screenshots were regenerated. A database test query initially interpreted a password-hash prefix incorrectly; its escaping was corrected and the database checks rerun. These were test or presentation defects and did not change stored customer orders. Each correction was checked again in the affected suite.
 
-Commands are in README.md. Run all mutation suites only against a disposable database. Browser and HTTP suites create real records within that database, so repeated runs can fill a collection slot. Recreate the disposable database or select unused slots if necessary. The failure suite temporarily installs a payment-insert trigger and changes one slot capacity; it removes/restores them in finally blocks. With binary logging enabled, set TEST_DB_ADMIN_USER and TEST_DB_ADMIN_PASSWORD to a test-database administrator for this CLI fixture only; the application account does not receive administrative privileges. If the test process is forcibly terminated, explicitly inspect and remove the `cafe_test_payment_failure` trigger before further use.
+For a new defect, record the page or test name, steps to reproduce, expected and actual result, severity, owner, fix reference and retest outcome. Critical defects involving order integrity or private data block the demonstration. A failed automated case should be rerun after the fix and followed by the neighbouring customer or staff journey to check for regression.
 
-The one-process PHP development server serialises requests. Locking is implemented in the database, but this report does not claim a multi-worker load or concurrent-race test. Production performance, penetration testing, external user feedback and tutor acceptance remain outside the evidence collected here.
+## Reproduction procedure
+
+Use a disposable database for suites that create accounts and orders. Set its connection details in an ignored `config/local.php` or the corresponding environment variables. Start a local PHP server or XAMPP Apache, then run the relevant commands from the project folder:
+
+```text
+php tests/domain.php
+php tests/database.php
+node tests/integration.mjs
+node tests/failure-cases.mjs
+node tests/browser.cjs
+```
+
+The HTTP suite needs `TEST_STAFF_PASSWORD` for a staff account in that disposable database. Browser checks need Playwright and Chrome or Edge; see README for the optional runtime settings. The failure suite temporarily installs a payment-failure database trigger and changes one test slot. It removes them after completion, but an interrupted run requires inspection before reuse. Never run mutation suites against real café orders.
+
+To repeat the manual XAMPP check, import the three numbered files under `database/xampp/` in phpMyAdmin, configure `config/local.php`, open the menu and Staff desk, and request a source path such as `/cafe/app/actions.php` from a full-folder installation. The source path should return 403. Test both customer and staff sign-in after any change to account setup.
+
+## Coverage limits
+
+The two-browser checks cover installed Chrome and Edge and viewport widths of 320 and 390 pixels; they do not constitute a full accessibility audit. Firefox, Safari, physical phones, a public HTTPS server and Docker startup were not exercised in this environment. The local PHP development server serialises requests, so the tests do not prove behaviour under multi-worker concurrent load, even though the database uses row locking. No real payment, email delivery, live-café user study, penetration test or external tutor acceptance was performed. These items require separate work before a public launch.
+
+## References
+
+- [System design](DESIGN.md) for requirement IDs and intended behaviour.
+- [Implementation and management guide](IMPLEMENTATION.md) for installation and operation.
+- `docs/evidence/` and the executable tests under `tests/` for recorded checks.

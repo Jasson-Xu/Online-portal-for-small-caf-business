@@ -1,97 +1,120 @@
-# Design and operating guide
+# Implementation and management guide 2026
 
-## Scope and architecture
+## Purpose and release scope
 
-The prototype implements Proposal-1 with the required HTML5, CSS3, JavaScript, PHP and MySQL stack. A server-rendered multi-page interface avoids a separate front-end build. `public/index.php` routes page requests; `app/actions.php` validates customer mutations and delegates staff changes to `app/staff_actions.php`; `app/views.php` renders customer pages and delegates staff pages to `app/staff_views.php`. `app/domain.php` contains quantity, collection-time and status rules. `app/bootstrap.php` supplies sessions, database access and helpers. Only `public/` is web-accessible.
+This guide explains how the Folks & Co. café portal was implemented, installed, used and operated for ICT312 Assignment 2 in 2026. It also defines practical risk, service and change-management procedures for the local demonstration. The system is a working click-and-collect prototype with simulated payments. It is not connected to a real café's point-of-sale system or payment provider.
 
-```mermaid
-flowchart LR
-  Browser[Customer or staff browser] --> Public[Public PHP entry point]
-  Public --> Views[HTML views and local CSS]
-  Public --> Actions[Validated POST actions]
-  Actions --> Domain[Ordering and status rules]
-  Actions --> PDO[Prepared PDO statements]
-  PDO --> MySQL[(MySQL InnoDB)]
-```
+The delivered stack is HTML5, CSS3, JavaScript, PHP and MySQL-compatible MariaDB. The main entry point is `public/index.php`; PHP renders pages and validates every state-changing request. The local XAMPP installation can use three ordered phpMyAdmin SQL files or `setup-xampp.cmd`. Docker is an optional alternative. Git records source changes, and the Word files under `docs/word/` form the Part B documentation set.
 
-## Data model
+## Implementation structure
 
-`users` stores account identity, a password hash and role. `menu_items` holds the current catalogue. `orders` links an account to a collection slot and snapshots the contact details, total and checkout key. `order_items` preserves item names and unit prices as ordered. `payments` records one simulated payment per order. `order_events` records the actor and time of status changes. `pickup_slots` holds the capacity counter. `login_attempts` persists sign-in throttling across sessions.
+| Component | Implementation responsibility |
+|---|---|
+| `public/index.php` and `public/assets/` | Route pages, deliver HTML, CSS, JavaScript and locally stored artwork. |
+| `app/views.php` and `app/staff_views.php` | Render customer and staff pages from validated data. |
+| `app/actions.php` | Registration, sign-in, bag editing and transactional checkout. |
+| `app/staff_actions.php` | Staff-only order state changes and catalogue edits. |
+| `app/domain.php` | Quantity, phone, pickup-time and status-transition rules. |
+| `app/bootstrap.php` | PDO connection, sessions, headers, escaping, CSRF and access helpers. |
+| `database/` | Eight InnoDB tables, sample menu and ordered XAMPP import files. |
 
-```mermaid
-erDiagram
-  users ||--o{ orders : places
-  users ||--o{ order_events : performs
-  pickup_slots ||--o{ orders : schedules
-  orders ||--|{ order_items : contains
-  menu_items ||--o{ order_items : identifies
-  orders ||--|| payments : records
-  orders ||--|{ order_events : tracks
-```
+The pages are server-rendered, so ordinary links and forms remain usable without a JavaScript build system. JavaScript improves confirmation and duplicate-click behaviour; it is not trusted for price, role or order validation. The database schema uses foreign keys, unique keys and a slot capacity check. Product prices are integer cents, and order lines keep the product name and price at the time of purchase.
 
-Monetary values are integer cents. Catalogue prices are re-read at checkout and compared with the displayed total. PDO prepares values separately from SQL. The order transaction locks the slot and catalogue rows, checks capacity and availability, writes the order/lines/payment/event, increments capacity and commits. Failure rolls the whole transaction back. A unique checkout key prevents successful request replay from creating a second order.
+### Checkout implementation
 
-Order transitions are `received → preparing → ready → collected`. Received and preparing orders can be cancelled; cancellation records `simulated_refunded` and releases slot capacity. Ready and collected orders cannot be cancelled through this prototype. Staff should verify handover before marking collected.
+The server checks the account, CSRF token, bag, contact details, slot and simulated-payment choice. It then starts one InnoDB transaction, locks the slot and menu rows, rejects a full slot or unavailable item, recalculates the total, and writes the order, lines, payment record and first status event. It increments the slot booking count before commit. Any exception rolls back all writes. A unique checkout key means a repeated successful request leads to the same receipt instead of creating another order.
+
+The allowed states are `received → preparing → ready → collected`. Staff may cancel only a received or preparing order. Cancellation records the actor, marks the simulated payment refunded and releases the slot count in one transaction. Staff catalogue edits change the live menu, while historical order-line snapshots remain unchanged.
+
+### Security and data handling
+
+Customer registration assigns only the customer role. Staff accounts are created through setup or the staff CLI. Passwords are hashed and checked by PHP; no plaintext password is stored in the database. Login rotates the session ID and limits attempts per email over a 15-minute window. Cookies are HttpOnly and SameSite=Lax. Every POST requires a CSRF token. PDO prepared statements handle values, user text is HTML-escaped, customer order reads check ownership, and staff actions check the role on the server.
+
+The demo staff credentials are `staff@example.test` / `1234567890`. In the XAMPP configuration, this account accepts sign-in only from the same computer. A real deployment would need HTTPS, a unique staff password, an operational privacy policy, retention rules and further security testing. The prototype asks for name, email, phone and order details only to support ordering and handover. The payment interface neither asks for nor stores card numbers or CVV values.
+
+## Installation manual for XAMPP
+
+These steps apply to a default Windows XAMPP installation with PHP 8.2 or newer and MariaDB/MySQL running on port 3306. The marker should use a fresh project copy and a test database. Do not overwrite an existing `htdocs\cafe` folder belonging to another site.
+
+1. Copy the whole project folder to `C:\xampp\htdocs\cafe` or the equivalent folder under the installed XAMPP directory. Keep the `app`, `config`, `database` and `public` folders together, including both `.htaccess` files.
+2. In the XAMPP Control Panel, start Apache and MySQL. Open `http://localhost/phpmyadmin/`.
+3. Import `database/xampp/01-create-database.sql`, then `02-create-tables.sql`, then `03-demo-data.sql`. Import one file at a time from phpMyAdmin's Import tab. The third file adds 12 menu products and the demo staff account. Re-importing does not delete orders.
+4. Copy `config/local.xampp.example.php` to `config/local.php`. The template uses XAMPP's default local MySQL `root` account with a blank password. Edit the password or port if the XAMPP installation differs. Keep `local.php` out of version control.
+5. Visit `http://localhost/cafe/public/`. Check that the home page and menu load. Register a customer, then sign out and sign in with the demo staff account to check the Staff desk. The project-root Apache rule must deny browser requests to `app/`, `config/` and the other source folders.
+
+If the project was previously linked by `setup-xampp.cmd`, keep that link and the existing `config/local.php`; the URL is `http://localhost/cafe/`. The command remains an alternative for a fresh installation: it creates a database-scoped account, imports the schema and menu, writes local settings and links only `public/` into `htdocs`. The manual SQL route is intended for a straightforward phpMyAdmin demonstration. A public service should use a least-privilege database account rather than the manual template's default root connection.
+
+If a page reports a database problem, check that XAMPP MySQL is running, that port and password in `local.php` match XAMPP, and that the three SQL imports finished in order. If the home page opens but the menu is empty, check the third import. If Apache uses a non-default port, include it in the browser URL. Stop Apache and MySQL in the Control Panel when the local demonstration is finished.
 
 ## User manual
 
-1. Browse Our menu, choose a category or enter a search term. Sold-out items cannot be added.
-2. Expand Make it yours / group order to add the recipient and a preparation note. Add multiple lines to separate people ordering the same item.
-3. Open Bag. Update quantities or remove lines. Totals update on the server. Register/sign in before checkout.
-4. Enter a collection name and phone number, choose an offered slot, and optionally add a group name and note. Slots use Canberra/Sydney local time and are checked again on submission.
-5. Select an approved or declined demonstration payment, acknowledge the simulation, and place the order. No card information is requested. A decline keeps the bag for retry.
-6. Read the confirmation and retain the order reference. My orders lists your latest 100 orders. Open an order and use Refresh status to see progress. Only your signed-in account can read your orders.
-7. Collect when Ready and show the reference to staff. Sign out on shared devices.
+### Customer tasks
 
-Staff sign in through the same page. The Staff desk shows counts and up to 100 matching orders, ordered by collection time. Filter by status, review group labels/notes, and use Start preparing, Mark ready or Mark collected. Cancellation requires a browser confirmation when JavaScript is enabled, then records a simulated refund. The staff queue is manually refreshed; it does not promise real-time push updates. Manage menu edits existing seeded items. Uncheck Available to order to mark an item sold out.
+1. Open Our menu and browse categories or search by name. Product cards show price, availability and allergen information; customers with allergies should confirm suitability directly with café staff.
+2. Select a quantity from 1 to 20 and add an item to the bag. For a group order, expand the item form and enter an optional recipient name and preparation note. Separate lines may identify different people ordering the same item.
+3. Open Bag to review the order, change a quantity or remove a line. The server recalculates the total. Register or sign in before checkout.
+4. Enter the collection name and phone number, choose an offered time and optionally add a group name and note. Collection slots are in Australia/Sydney time, from 07:00 to 15:45, at least 15 minutes ahead, today or within the following two days.
+5. Acknowledge that payment is simulated and choose Approved to place the demonstration order. Declined shows a failure without charging money or deleting the bag. No card details are requested.
+6. Save the confirmation reference. My orders lists the customer's recent orders; open one to review its status and receipt. The customer can refresh the tracking page while staff prepare the order.
 
-## Security and privacy
+### Staff tasks
 
-Passwords use PHP `password_hash` and `password_verify`; registration never accepts a staff role. Login rotates the session ID. Cookies are HttpOnly and SameSite=Lax; enable secure cookies over HTTPS. Mutating forms use a session CSRF token. User data is HTML-escaped. Order reads check account ownership; staff actions verify the role on the server. Sign-in allows ten attempts per email in a 15-minute window across sessions.
+1. Sign in with the staff account and open Staff desk. Review the order reference, collection time, contact name, group labels and preparation notes before starting work.
+2. Use the status controls in order: Start preparing, Mark ready, then Mark collected at handover. The server rejects skipped or stale transitions. Refresh the queue to see new orders.
+3. If an order is still received or preparing and cannot be fulfilled, cancel it. The system records a simulated refund and releases its reserved slot. No real payment is returned because no real charge occurred.
+4. Open Manage menu to change an existing item's name, description, category, allergens, price or availability. Mark sold-out items unavailable before customers place new orders. Old receipts retain their original item names and prices.
+5. Sign out on a shared computer. Do not use the fixed demo password outside a local demonstration.
 
-The XAMPP installation creates a local demonstration staff account with the requested fixed password, either through the three ordered phpMyAdmin SQL imports or the automatic setup command. Its account is limited to sign-in requests from the same computer. Other installations can provision staff through the CLI with a unique password.
+## Risk management plan
 
-Only operational account/order data is collected. There are no payment-card fields, marketing trackers or external asset calls. The privacy page explains purpose, session cookies and simulated payment. Customer deletion requires operator handling; no email verification or password reset is implemented. Staff provisioning is through local setup or CLI, never customer registration. Public production use requires HTTPS, real operational contact details, appropriate retention rules, supported runtime patching and a further security review. These are deployment prerequisites, not a claim of legal certification.
+The team assesses risks at each integration review and after any incident. Likelihood and impact are rated Low, Medium or High for the demonstration context. The named owner checks the preventive control, records any trigger and coordinates the response. A risk is closed only after its control has been tested or the exposure has been accepted for the prototype.
 
-## Methodology and design decisions
-
-An iterative approach fits a three-person project: each increment ends with a demonstrable customer or staff outcome and a test. A strict waterfall approach would provide stable upfront documentation but delay feedback on the ordering journey. Unstructured coding would reduce planning overhead but leave integration and ownership unclear. The proposed approach uses short weekly review cycles within an agreed scope and fixed Week 12 delivery.
-
-Plain PHP and server-rendered forms directly match the brief and run without a JavaScript build pipeline. A SPA framework would support richer client interactions but add dependencies and duplicate routing/state concerns. MySQL-compatible MariaDB fits the required relational data and transactional ordering; local browser storage alone would not protect staff access or preserve shared orders. XAMPP is the default local environment. For manual setup, students import three ordered SQL files in phpMyAdmin, copy the local settings template, and place the project under `htdocs`; Apache rules allow the browser into `public/` only. The setup command is an alternative that provisions a database-scoped account and links only `public/` into Apache's document folder. Docker remains an optional repeatable environment. JavaScript enhances confirmation and duplicate-click handling; server validation remains authoritative.
-
-## Risk register
-
-| Risk | Likelihood / impact | Control | Owner |
+| Risk and rating | Prevention | Trigger and response | Owner |
 |---|---|---|---|
-| Database unavailable | Medium / high | Generic error page; inspect server logs; database backup and restore rehearsal | Mandip Rijal |
-| Duplicate or partial orders | Medium / high | Unique checkout key, one database transaction, rollback and replay tests | Mandip Rijal |
-| Collection overload | Medium / medium | Locked slot counters; eight orders per slot; reject full slots | Mandip Rijal |
-| Unauthorised access | Medium / high | Role and ownership checks, hashed passwords, CSRF tokens, prepared statements | All members |
-| Allergy misunderstanding | Medium / high | Menu allergen text, shared-kitchen notice and direct discussion with staff | Jasson |
-| Scope expansion | High / medium | Keep real payments, delivery and advanced inventory out of assessment scope | Jasson |
-| Installation failure | Medium / high | SQL/setup scripts, no front-end build, documented clean install | Rudesh |
-| Missing contribution evidence | Medium / high | Record real issue/commit links and weekly decisions; preserve actual timestamps | All members |
+| Database outage — Medium / High | Verify MySQL at startup; keep a current export outside `public/`. | Connection error: stop new orders, check MySQL and settings, restore from a tested backup if needed. | Mandip Rijal |
+| Partial or duplicate order — Low / High | One transaction, foreign keys, unique checkout key and regression tests. | Mismatched order/payment count: stop checkout, inspect logs and database, fix before reopening. | Mandip Rijal |
+| Full collection slot — Medium / Medium | Row locking and eight-order capacity. | Full-slot rejection: offer another slot and verify booked count. | Mandip Rijal |
+| Unauthorized order access — Medium / High | Ownership and role checks, CSRF, password hashing and private config. | Suspicious access: stop the site, preserve logs, rotate credentials and investigate affected records. | All members |
+| Allergen or note misunderstanding — Medium / High | Display allergens and advise direct staff confirmation. | Unclear or unsafe request: staff contact the customer before preparation. | Jasson |
+| Installation failure — Medium / High | Ordered SQL files, XAMPP guide and smoke checks. | Site fails on a new machine: check Apache, PHP, DB config, import order and source access. | Rudesh |
+| Scope growth or missed handover — Medium / Medium | Protect core journeys; defer real payments, delivery and inventory. | New feature request: assess effect on Week 12 work and record a change decision. | Jasson |
 
-## Service management
+The fixed demo staff password is a deliberate local-testing exposure. It is restricted to local sign-in and must be replaced before any network-facing deployment. The risk plan does not claim that a production security review or real-world performance trial has occurred.
 
-The operator checks the database and a sample page before service, reviews pending orders during opening hours, and verifies the collection queue before closing. Local assessment target: restore a failed demonstration within one hour using the latest daily backup; this is a proposed target, not a measured SLA. A public release needs a separately agreed availability target.
+## Service management plan
 
-Back up with `mysqldump --single-transaction --no-tablespaces -h 127.0.0.1 -u cafe_app -p cafe_portal > backup.sql` (use an interactive command prompt or a backup tool that preserves UTF-8). Keep backups outside `public/`, restrict access and test recovery into a separate database. On Windows PowerShell 5, prefer `mysqldump --result-file=backup.sql` to avoid output re-encoding. For restore, use MySQL's `source /absolute/path/backup.sql` from its interactive client. Never restore over active data without an explicit recovery decision and a current backup.
+The service covered by this plan is the local demonstration and its stored test orders. During a demonstration, the operator checks that Apache and MySQL are running, opens the home page and menu, and verifies that the Staff desk is accessible. Staff refresh the queue during service, check collection times and reconcile ready or uncollected orders before closing. The operator stops local services when they are not needed.
 
-Incident priorities: failed ordering or exposed private data is urgent; a single unavailable product is normal; cosmetic defects are low. Record symptom, time, affected order references, owner and fix. If checkout fails, customers first check My orders before retrying. Inspect private PHP/MySQL logs; do not show stack traces or credentials in the UI. Restore service, rerun a smoke order, then record the cause and prevention action.
+The proposed recovery objective for the demonstration is to restore a working local copy within one hour of a failure, using a recent database export and the Git-tracked source. This is a planning target, not a measured service-level agreement. Before a demonstration and before a schema change, export the database with phpMyAdmin or `mysqldump --single-transaction --no-tablespaces`. Store the export outside `public/` and test a restore into a separate database. Retention and deletion periods for any real café must be set by the operator before live use.
 
-## Change management
+| Priority | Example | First response and owner |
+|---|---|---|
+| Critical | Private data exposed or staff access bypassed | Stop site access, preserve evidence, rotate credentials; team leader coordinates. |
+| High | Checkout cannot create orders or database unavailable | Pause ordering, inspect Apache/PHP/MySQL logs and connection settings; Mandip leads. |
+| Medium | One product or slot behaves incorrectly | Mark item unavailable or offer another slot, record the issue; relevant component owner leads. |
+| Low | Cosmetic layout or wording defect | Record for the next reviewed release; Jasson coordinates. |
 
-Record each change as an issue with purpose, user impact, acceptance criteria and owner. Assess database, security and timetable effects. Develop on a branch, request a teammate review and run relevant tests. Back up before schema changes. Merge only after acceptance evidence is recorded. Keep deployable releases tagged and preserve real Git authorship/timestamps. Revert an application change using a reviewed Git revert; database rollback may require a separate migration or restore because reverting code does not undo data changes.
+For every incident, record detection time, affected workflow and order references, owner, actions, recovery time and prevention decision. If checkout returns an error, the customer should check My orders before retrying to avoid confusion about a submitted order. After recovery, perform a smoke test: menu loads, a test customer can reach checkout, and staff can see the resulting order. Do not expose stack traces, private logs or database credentials through the browser.
 
-## Week 12 demonstration outline
+## Change management plan
 
-Jasson introduces the busy-café problem, navigates the menu on mobile and prepares a labelled group bag. Mandip explains account protection and demonstrates a declined payment followed by approved checkout, then shows the stored receipt and slot logic. Rudesh demonstrates the staff queue, prepares and completes the order, and shows test evidence, installation and operational handover. Finish by explaining simulated payments and the prototype boundaries. Target 8–10 minutes and allocate comparable speaking time.
+Every proposed change receives a short record with its purpose, requester, owner, affected pages or tables, acceptance criteria and rollback approach. The team leader reviews the impact on data, privacy, security, schedule and documentation. A routine catalogue edit can be performed through Manage menu; a code or schema change needs review and tests before release.
 
-## Sources
+| Change class | Examples | Minimum control |
+|---|---|---|
+| Routine content | Price, description, allergen or availability edit | Staff checks the result in the menu and records the reason. |
+| Normal code change | Page, validation or workflow change | Branch or separate commit, teammate review, relevant tests and smoke check. |
+| Database change | Table or constraint update | Back up first, test migration and restore in a separate database, then schedule installation. |
+| Emergency correction | Ordering or privacy defect during demonstration | Limit the immediate change, verify the failing path and full checkout, document the decision afterward. |
 
-- Supplied ICT312 Assignment 02 brief: required stack, group size, weekly progress, working system, Word documentation and individual reflection.
-- Supplied Proposal-1: café click-and-collect scope, group ordering, simulated payments and security intentions.
-- [PHP password hashing manual](https://www.php.net/manual/en/function.password-hash.php): password hash API.
-- [PHP prepared statements manual](https://www.php.net/manual/en/pdo.prepared-statements.php): prepared PDO statements.
-- [MySQL locking reads](https://dev.mysql.com/doc/refman/8.4/en/innodb-locking-reads.html): transactional row locking.
+The release sequence is: log the request; assess effects; agree the acceptance test; implement and review; run relevant automated and browser checks; update the Word and Markdown guides; commit with a meaningful message; and install on XAMPP. If a code release fails, revert the reviewed commit and rerun the smoke test. Reverting Git does not undo database changes, so a schema rollback requires its tested reverse migration or a deliberate restore decision. Keep source authorship and commit times as recorded by version control.
+
+## Handover checks
+
+The Part B handover consists of all source folders, the three ordered XAMPP SQL files, the three Word documents, and the test evidence under `docs/evidence/`. On the marker's computer, verify the install steps, menu, registration, simulated checkout, order tracking, staff queue and status update. The individual reflection and any tutor discussion record are separate assessment items.
+
+## References
+
+- ICT312 Assignment 2 brief and Proposal-1 supplied with the project.
+- [System design](DESIGN.md), [test plan and results](TEST_REPORT.md), and [2026 team plan](TEAM_PLAN.md).
+- [PHP password hashing](https://www.php.net/manual/en/function.password-hash.php), [PDO prepared statements](https://www.php.net/manual/en/pdo.prepared-statements.php), and [MySQL locking reads](https://dev.mysql.com/doc/refman/8.4/en/innodb-locking-reads.html).
