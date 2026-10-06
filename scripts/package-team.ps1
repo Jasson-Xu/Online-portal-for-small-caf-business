@@ -8,8 +8,8 @@ $output = [System.IO.Path]::GetFullPath($OutputDirectory)
 
 $groups = [ordered]@{
     Jasson = @('.gitattributes','.gitignore','README.md','app/views.php','docs/TEAM_PLAN.md','docs/WEEKLY_CHECKPOINTS.md','public/assets/app.js','public/assets/mark.svg','public/assets/styles.css','public/index.php','scripts/package-team.ps1')
-    Mandip_Rijal = @('.env.example','Dockerfile','compose.yaml','app/actions.php','app/bootstrap.php','app/domain.php','config/config.php','config/local.example.php','database/schema.sql','database/seed.sql','scripts/create-staff.php','scripts/install.php','tests/database.php','tests/domain.php','tests/failure-cases.mjs','tests/fault-fixture.php','var/.gitkeep')
-    Rudesh = @('.dockerignore','app/staff_actions.php','app/staff_views.php','docs/IMPLEMENTATION.md','docs/TEST_REPORT.md','docs/evidence/browser-results-chrome.json','docs/evidence/browser-results-msedge.json','docs/evidence/failure-results.json','docs/evidence/integration-results.json','tests/browser.cjs','tests/integration.mjs')
+    Mandip_Rijal = @('.env.example','Dockerfile','compose.yaml','app/actions.php','app/bootstrap.php','app/domain.php','config/config.php','config/local.example.php','database/schema.sql','database/seed.sql','scripts/create-staff.php','scripts/install.php','scripts/setup-xampp.php','tests/database.php','tests/domain.php','tests/failure-cases.mjs','tests/fault-fixture.php','var/.gitkeep')
+    Rudesh = @('.dockerignore','app/staff_actions.php','app/staff_views.php','docs/IMPLEMENTATION.md','docs/TEST_REPORT.md','docs/evidence/browser-results-chrome.json','docs/evidence/browser-results-msedge.json','docs/evidence/failure-results.json','docs/evidence/integration-results.json','setup-xampp.cmd','scripts/setup-xampp.ps1','tests/browser.cjs','tests/integration.mjs')
 }
 
 Push-Location $project

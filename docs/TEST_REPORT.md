@@ -13,8 +13,11 @@ Execution date: 6 October 2026. Environment: Windows, PHP 8.4.0, MySQL 9.1.0, lo
 | Browser workflow in Chrome | 23 passed | Real form submissions, group ordering, checkout, staff sign-in, no JavaScript errors, 320/390 pixel page widths |
 | Browser workflow in Edge | 23 passed | Same browser workflow and responsive checks in a second installed browser |
 | Failure recovery | 4 passed | Full collection slot, payment-storage rollback, preserved cart and recovery |
+| XAMPP installation | Passed | PHP 8.2 and MariaDB 10.4, fresh dedicated database user, repeat setup, Apache junction, home/menu/CSS via `/cafe/` |
 
 The browser checks detect horizontal overflow and exercise a real order. Screenshots were also inspected for visual layout. They are not a claim of formal accessibility certification. Firefox, Safari, physical phones, a public HTTPS deployment, Docker startup and MySQL 8.4 were not executed in this environment. The installation options must be rehearsed on the actual marker's machine.
+
+The XAMPP setup was also exercised on the installed Windows XAMPP stack. A clean setup created a dedicated application account; a repeat run retained existing records and staff credentials. Apache served the linked public folder at `/cafe/` with HTTP 200 for the home page, menu and stylesheet. Temporary Apache and MariaDB processes were stopped after verification. A custom XAMPP location or administrator password was not exercised.
 
 ## Representative acceptance cases
 

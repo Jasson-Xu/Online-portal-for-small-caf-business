@@ -4,47 +4,21 @@ A complete PHP and MySQL click-and-collect student project for ICT312 Assignment
 
 ## Requirements
 
-- PHP 8.2 or newer, with PDO MySQL and sessions enabled.
-- MySQL 8.0 or newer, using InnoDB and utf8mb4.
-- A modern browser. Node.js 20+ is needed only for integration tests.
+- Windows XAMPP with PHP 8.2 or newer and PDO MySQL enabled. This project was checked with XAMPP PHP 8.2 and MariaDB 10.4.
+- A modern browser. Node.js 20+ is needed only for optional integration tests.
 - No Composer, npm build, internet assets or framework is required to run the app.
 
-## Local installation with WAMP or XAMPP
+## Start locally with XAMPP
 
-1. Start MySQL. Create a dedicated database and local database account using an administrator connection:
+1. In the **XAMPP Control Panel**, start **Apache** and **MySQL**. Leave the café project in its own folder; it does not need to be copied into `htdocs`.
+2. From the project folder, double-click `setup-xampp.cmd`. Alternatively, in PowerShell run `powershell -ExecutionPolicy Bypass -File .\scripts\setup-xampp.ps1`. The setup detects XAMPP in `D:\XAMPP` or `C:\xampp`. If yours is elsewhere, set `XAMPP_ROOT` to its installation folder.
+3. Save the staff email and password printed by setup. Open **[http://localhost/cafe/](http://localhost/cafe/)**. Register a customer account or sign in as staff.
 
-   ```sql
-   CREATE DATABASE cafe_portal CHARACTER SET utf8mb4;
-   CREATE USER 'cafe_app'@'127.0.0.1' IDENTIFIED BY 'choose-a-local-password';
-   GRANT ALL PRIVILEGES ON cafe_portal.* TO 'cafe_app'@'127.0.0.1';
-   ```
+Setup creates the café database, an account limited to that database, the tables, sample menu and a staff account. It writes its database settings to ignored `config/local.php` and links **only `public/`** into XAMPP's `htdocs` folder. An existing `htdocs/cafe` that points elsewhere is left untouched. Existing orders and staff passwords are retained on repeat runs. If prior local database settings need replacing, setup backs them up under ignored `var/`. No extra Apache configuration or PHP development server is needed.
 
-2. Copy `config/local.example.php` to `config/local.php`. Enter the MySQL host, port, database name, username and password. Use `127.0.0.1` consistently. Never commit the local configuration.
-3. From the project root, run:
+If XAMPP's MySQL administrator has a password, set `XAMPP_DB_ADMIN_PASSWORD` in PowerShell before running setup, then remove it from the environment afterwards. The default database port is 3306; set `XAMPP_DB_PORT` if you deliberately changed XAMPP's port. If Apache is on a non-default port, open `http://localhost:<port>/cafe/`. To stop the site, stop Apache in the XAMPP Control Panel. The project link and data stay in place for the next start.
 
-   ```text
-   php scripts/install.php
-   ```
-
-4. Create a staff account. In PowerShell:
-
-   ```powershell
-   $env:CAFE_STAFF_PASSWORD = 'choose-a-unique-staff-password'
-   php scripts/create-staff.php staff@example.test "Cafe staff"
-   Remove-Item Env:\CAFE_STAFF_PASSWORD
-   ```
-
-   On macOS/Linux: `CAFE_STAFF_PASSWORD='choose-a-unique-staff-password' php scripts/create-staff.php staff@example.test 'Cafe staff'`.
-
-5. Start the development server from the project root:
-
-   ```text
-   php -S 127.0.0.1:8080 -t public
-   ```
-
-6. Open [the local portal](http://127.0.0.1:8080). Register a customer account or sign in with the staff account you created.
-
-If PHP is not on PATH, use the full path to your WAMP/XAMPP `php.exe`. Serve **only the `public` directory**. Do not expose the project root through Apache. For a permanent Apache installation, set the virtual host DocumentRoot to the project's `public` directory and allow access to that directory. The development server is for local assessment, not public hosting.
+`scripts/install.php` and `scripts/create-staff.php` remain available for manual or Docker installations. Never commit `config/local.php` or serve the project root directly from Apache. XAMPP is a local development environment, not a production deployment.
 
 ## Docker alternative
 
@@ -81,7 +55,7 @@ Optional browser checks require Playwright and installed Chrome: set `PLAYWRIGHT
 
 Failure recovery checks: `node tests/failure-cases.mjs`. Set `TEST_PHP` to the PHP executable and optionally `TEST_PHP_INI` to the test configuration. If MySQL binary logging requires administrative trigger privileges, set `TEST_DB_ADMIN_USER` and `TEST_DB_ADMIN_PASSWORD` for the CLI fixture only. Run this suite only on a disposable database; it temporarily injects a payment-storage failure.
 
-See [test evidence](docs/TEST_REPORT.md) for the executed results and limits. Docker and MySQL 8.4 are supplied installation options; local execution was verified on Windows with PHP 8.4 and MySQL 9.1.
+See [test evidence](docs/TEST_REPORT.md) for the executed results and limits. The original integration suite ran on Windows with PHP 8.4 and MySQL 9.1; the XAMPP setup is checked separately with PHP 8.2 and MariaDB 10.4.
 
 ## Handover and team plan
 
@@ -89,7 +63,7 @@ See [test evidence](docs/TEST_REPORT.md) for the executed results and limits. Do
 - [Three-person allocation and weekly plan](docs/TEAM_PLAN.md)
 - [Weekly checkpoints from August 20](docs/WEEKLY_CHECKPOINTS.md)
 - Run `powershell -File scripts/package-team.ps1` to produce three assigned-component ZIPs in `dist/`. Extract all three into the same folder for a complete working project. ZIP labels are proposed responsibilities and do not establish individual authorship.
-- The source ZIP is in `dist/`. Word deliverables and the individual reflection were deferred at the user's request.
+- Word deliverables and the individual reflection were deferred at the user's request.
 - Jasson: customer interface, accessibility and coordination. Mandip Rijal: accounts, data and checkout. Rudesh: staff operations, verification and handover. Each proposed allocation is 40 effort points; actual contributions must be recorded by the people involved.
 
-The plan is not a historical activity log. Git commits retain their actual creation times and configured author. The supplied August 17–October 6 window contains eight weekly buckets, whereas academic Weeks 3–12 contain ten weeks; these are documented separately pending the course calendar. Personal reflections and tutor feedback must be supplied from real experience.
+The plan is not a historical activity log. Git commits retain their actual creation times and configured author. The requested August 20–October 6 checkpoints differ from academic Weeks 3–12; these are documented separately pending the course calendar. Personal reflections and tutor feedback must be supplied from real experience.

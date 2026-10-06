@@ -1,5 +1,5 @@
 <?php
-// Copy this file to local.php and enter your local database credentials.
+// Manual setup only. setup-xampp.cmd creates local.php automatically.
 return [
     'db_host' => '127.0.0.1',
     'db_port' => '3306',
