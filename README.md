@@ -8,14 +8,18 @@ A complete PHP and MySQL click-and-collect student project for ICT312 Assignment
 - A modern browser. Node.js 20+ is needed only for optional integration tests.
 - No Composer, npm build, internet assets or framework is required to run the app.
 
-## Start locally with XAMPP: phpMyAdmin import
+## Start with XAMPP on Windows
 
-1. Copy the **whole project folder** into XAMPP's `htdocs` folder and name it `cafe` (for example, `C:\xampp\htdocs\cafe`). Keep `app`, `config`, `database`, `public`, and the other folders together. If `htdocs\cafe` is already a link to this project's `public/` from the earlier setup, keep that link and skip the copy.
-2. In the **XAMPP Control Panel**, start **Apache** and **MySQL**. Open [phpMyAdmin](http://localhost/phpmyadmin/), choose **Import**, and import these files **one at a time, in order**: [`01-create-database.sql`](database/xampp/01-create-database.sql), [`02-create-tables.sql`](database/xampp/02-create-tables.sql), [`03-demo-data.sql`](database/xampp/03-demo-data.sql). The files create `cafe_portal`, its tables, the sample menu, and the demo staff account. They do not delete existing orders if imported again.
-3. If `config/local.php` does not already exist, copy `config/local.xampp.example.php` to `config/local.php`. A default local XAMPP installation uses MySQL user `root` with a blank password. If you set a MySQL root password or changed port 3306, edit those two values in `config/local.php`. Keep an existing working `config/local.php` from automatic setup.
-4. Open [http://localhost/cafe/public/](http://localhost/cafe/public/). Register a customer account or sign in as staff with `staff@example.test` / `1234567890`. The project-root `.htaccess` blocks browser access to the source folders; `public/` is the website. If you are using the earlier `setup-xampp.cmd` link, the URL remains [http://localhost/cafe/](http://localhost/cafe/), and its existing `config/local.php` may be kept.
+1. In the **XAMPP Control Panel**, start **Apache** and **MySQL**.
+2. Put the **whole project** in XAMPP's `htdocs` folder as `cafe`. On this computer, use `D:\XAMPP\htdocs\cafe` and check that `D:\XAMPP\htdocs\cafe\public\index.php` exists. If XAMPP is installed on `C:`, use `C:\xampp\htdocs\cafe` instead. Keep the `app`, `config`, `database` and `public` folders together.
+3. Open [phpMyAdmin](http://localhost/phpmyadmin/). Select **Import**, choose [`01-create-database.sql`](database/xampp/01-create-database.sql), and click **Import** at the bottom. Repeat for [`02-create-tables.sql`](database/xampp/02-create-tables.sql), then [`03-demo-data.sql`](database/xampp/03-demo-data.sql), in that order. The files create the database, tables, menu and demo staff account.
+4. Open [http://localhost/cafe/public/](http://localhost/cafe/public/). The staff login is `staff@example.test` with password `1234567890`. You can also register a customer account.
 
-This manual path uses phpMyAdmin and the three SQL files, without running a PHP installer. The known-password demo staff account can sign in only from the same computer. Keep `config/local.php` private and never commit it. If `staff@example.test` already belongs to a customer, the SQL leaves that customer unchanged; use a fresh database or change that customer email before importing the demo data.
+**For a standard XAMPP installation, that is all.** The app automatically uses local MySQL user `root`, a blank password and port `3306`; you do not need to create or edit `config/local.php`. The fixed-password staff account can sign in only from the same computer. The SQL files can be re-imported without deleting existing orders.
+
+If your MySQL root account has a password or MySQL uses another port, copy [`config/local.xampp.example.php`](config/local.xampp.example.php) in the same folder and rename the copy to `local.php`. Open that new file in a text editor and change only `db_password` and/or `db_port` to match XAMPP. This file is private local settings and is ignored by Git. If it already exists and the site works, leave it alone. If you used `setup-xampp.cmd` previously, it may have created an `htdocs\cafe` link; keep that link and open [http://localhost/cafe/](http://localhost/cafe/) instead of copying the project.
+
+If the page cannot connect to the database, check that MySQL is running and that all three imports showed success. If the page returns 404, check the folder path and URL. If Apache uses a custom port, add it after `localhost` (for example, `localhost:8080`). The project-root `.htaccess` prevents browser access to source folders.
 
 ### Automatic setup alternative
 

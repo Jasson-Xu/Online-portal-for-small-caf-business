@@ -34,17 +34,18 @@ The demo staff credentials are `staff@example.test` / `1234567890`. In the XAMPP
 
 ## Installation manual for XAMPP
 
-These steps apply to a default Windows XAMPP installation with PHP 8.2 or newer and MariaDB/MySQL running on port 3306. The marker should use a fresh project copy and a test database. Do not overwrite an existing `htdocs\cafe` folder belonging to another site.
+These steps apply to a default Windows XAMPP installation with PHP 8.2 or newer. Use a fresh project copy and avoid overwriting an existing `htdocs\cafe` site.
 
-1. Copy the whole project folder to `C:\xampp\htdocs\cafe` or the equivalent folder under the installed XAMPP directory. Keep the `app`, `config`, `database` and `public` folders together, including both `.htaccess` files.
-2. In the XAMPP Control Panel, start Apache and MySQL. Open `http://localhost/phpmyadmin/`.
-3. Import `database/xampp/01-create-database.sql`, then `02-create-tables.sql`, then `03-demo-data.sql`. Import one file at a time from phpMyAdmin's Import tab. The third file adds 12 menu products and the demo staff account. Re-importing does not delete orders.
-4. Copy `config/local.xampp.example.php` to `config/local.php`. The template uses XAMPP's default local MySQL `root` account with a blank password. Edit the password or port if the XAMPP installation differs. Keep `local.php` out of version control.
-5. Visit `http://localhost/cafe/public/`. Check that the home page and menu load. Register a customer, then sign out and sign in with the demo staff account to check the Staff desk. The project-root Apache rule must deny browser requests to `app/`, `config/` and the other source folders.
+1. Start Apache and MySQL in the XAMPP Control Panel.
+2. Copy the whole project to `D:\XAMPP\htdocs\cafe` on this computer (or `C:\xampp\htdocs\cafe` if XAMPP is installed there). Check that `public\index.php` exists inside the copied folder and keep the `app`, `config`, `database` and `public` folders together.
+3. Open `http://localhost/phpmyadmin/`. In its Import tab, choose `database/xampp/01-create-database.sql` and click Import. Repeat for `02-create-tables.sql` and `03-demo-data.sql`, in order. The third file adds 12 menu products and the demo staff account; re-importing does not delete orders.
+4. Open `http://localhost/cafe/public/`. Check the menu, register a customer, then sign in to the Staff desk using `staff@example.test` and password `1234567890`. Check that browser requests to `app/` and `config/` are denied by the project-root `.htaccess`.
 
-If the project was previously linked by `setup-xampp.cmd`, keep that link and the existing `config/local.php`; the URL is `http://localhost/cafe/`. The command remains an alternative for a fresh installation: it creates a database-scoped account, imports the schema and menu, writes local settings and links only `public/` into `htdocs`. The manual SQL route is intended for a straightforward phpMyAdmin demonstration. A public service should use a least-privilege database account rather than the manual template's default root connection.
+No configuration file is needed for standard XAMPP: local requests automatically use MySQL `root` with a blank password on port `3306`. If XAMPP's MySQL has a custom root password or port, copy `config/local.xampp.example.php` to `config/local.php` and edit `db_password` or `db_port`. This private file is ignored by Git. A public deployment needs its own restricted database account and security configuration.
 
-If a page reports a database problem, check that XAMPP MySQL is running, that port and password in `local.php` match XAMPP, and that the three SQL imports finished in order. If the home page opens but the menu is empty, check the third import. If Apache uses a non-default port, include it in the browser URL. Stop Apache and MySQL in the Control Panel when the local demonstration is finished.
+If the project was previously linked by `setup-xampp.cmd`, keep that link and its working `config/local.php`; the URL is `http://localhost/cafe/`. The command remains an alternative for a fresh installation: it creates a database-scoped account, imports the schema and menu, writes local settings and links only `public/` into `htdocs`.
+
+For a database connection error, check that MySQL is running, that all three SQL imports completed, and that any custom `local.php` password and port match XAMPP. For a 404 page, check the copied folder and URL. If the menu is empty, repeat the third SQL import. Add Apache's port after `localhost` when it differs from port 80. Stop Apache and MySQL in the Control Panel when the local demonstration is finished.
 
 ## User manual
 

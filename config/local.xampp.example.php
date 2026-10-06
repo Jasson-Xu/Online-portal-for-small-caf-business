@@ -1,6 +1,6 @@
 <?php
-// For the manual phpMyAdmin import on a default local XAMPP installation.
-// Copy this file to local.php. If your MySQL root account has a password, set it below.
+// Optional: default local XAMPP works without this file.
+// If MySQL uses a custom password or port, copy this file to local.php and edit below.
 return [
     'db_host' => '127.0.0.1',
     'db_port' => '3306',

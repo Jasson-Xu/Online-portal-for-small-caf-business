@@ -79,7 +79,7 @@ node tests/browser.cjs
 
 The HTTP suite needs `TEST_STAFF_PASSWORD` for a staff account in that disposable database. Browser checks need Playwright and Chrome or Edge; see README for the optional runtime settings. The failure suite temporarily installs a payment-failure database trigger and changes one test slot. It removes them after completion, but an interrupted run requires inspection before reuse. Never run mutation suites against real café orders.
 
-To repeat the manual XAMPP check, import the three numbered files under `database/xampp/` in phpMyAdmin, configure `config/local.php`, open the menu and Staff desk, and request a source path such as `/cafe/app/actions.php` from a full-folder installation. The source path should return 403. Test both customer and staff sign-in after any change to account setup.
+To repeat the manual XAMPP check, import the three numbered files under `database/xampp/` in phpMyAdmin and open the menu and Staff desk. Standard XAMPP needs no `config/local.php`; create it from `config/local.xampp.example.php` only for a custom MySQL password or port. Request a source path such as `/cafe/app/actions.php` from a full-folder installation; it should return 403. Test both customer and staff sign-in after any change to account setup.
 
 ## Coverage limits
 
