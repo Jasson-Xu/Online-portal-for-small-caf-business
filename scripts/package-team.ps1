@@ -26,11 +26,12 @@ try {
     git diff --quiet HEAD --
     if ($LASTEXITCODE -ne 0) { throw 'Commit tracked changes before packaging so every ZIP uses the same Git revision.' }
     $commit = (git rev-parse --short HEAD).Trim()
-    $sourceArchivePath = Join-Path $output 'Folks-Cafe-Portal-Source.zip'
-    & git archive --format=zip --prefix=Folks-Cafe-Portal/ "--output=$sourceArchivePath" HEAD
-    if ($LASTEXITCODE -ne 0) { throw 'Unable to build the complete source ZIP from Git.' }
-    $sourceArchive = [System.IO.Compression.ZipFile]::OpenRead($sourceArchivePath)
+    $sourceArchivePath = Join-Path $project ('var\package-source-' + [guid]::NewGuid().ToString('N') + '.zip')
+    $sourceArchive = $null
     try {
+        & git archive --format=zip --prefix=Folks-Cafe-Portal/ "--output=$sourceArchivePath" HEAD
+        if ($LASTEXITCODE -ne 0) { throw 'Unable to build the temporary source archive from Git.' }
+        $sourceArchive = [System.IO.Compression.ZipFile]::OpenRead($sourceArchivePath)
         foreach ($member in $groups.Keys) {
             $archivePath = Join-Path $output ("Folks-Cafe-Portal-{0}.zip" -f $member)
             $stream = [System.IO.File]::Open($archivePath,[System.IO.FileMode]::Create)
@@ -51,15 +52,23 @@ try {
                     $writer = New-Object System.IO.StreamWriter($readme.Open())
                     try {
                         $writer.WriteLine("Assigned component package: $member")
+                        $role = @{ Jasson = 'Customer pages, responsive interface, design and coordination'; Mandip_Rijal = 'Accounts, data model, checkout and database setup'; Rudesh = 'Staff workflow, tests, installation and handover documents' }[$member]
+                        $writer.WriteLine("Area: $role")
+                        $writer.WriteLine('Balanced planning allocation: 40 effort points per member.')
                         $writer.WriteLine("Source revision: $commit")
-                        $writer.WriteLine('This is a proposed work allocation, not evidence of individual authorship.')
-                        $writer.WriteLine('Extract all three ZIPs into the same destination to form the runnable project.')
-                        $writer.WriteLine('Then follow README.md for database setup and staff account creation.')
-                        $writer.WriteLine('No local database password, runtime data or Git history is included.')
+                        $writer.WriteLine()
+                        $writer.WriteLine('All three ZIPs together contain the complete project. Extract them into one folder before installation. One component ZIP is not a runnable site.')
+                        $writer.WriteLine()
+                        $writer.WriteLine('For future Git work: clone the shared repository, create your own branch, extract this ZIP to a temporary folder, and copy its assigned files into the clone while preserving paths. Review and change only work you actually complete, run relevant tests, then commit under your own configured Git identity and push your branch for review.')
+                        $writer.WriteLine('The remote repository already contains this snapshot. Copying identical files into a clone creates no Git diff or commit; make genuine changes before committing. Do not rewrite author names or commit dates to imply earlier work.')
+                        $writer.WriteLine('No local database password, runtime data or Git history is included in this archive.')
                     } finally { $writer.Dispose() }
                 } finally { $archive.Dispose() }
             } finally { $stream.Dispose() }
             Write-Output ("{0}: {1} assigned source files -> {2}" -f $member,$groups[$member].Count,$archivePath)
         }
-    } finally { $sourceArchive.Dispose() }
+    } finally {
+        if ($sourceArchive) { $sourceArchive.Dispose() }
+        if (Test-Path -LiteralPath $sourceArchivePath -PathType Leaf) { Remove-Item -LiteralPath $sourceArchivePath -Force }
+    }
 } finally { Pop-Location }
