@@ -4,7 +4,7 @@
 
 This guide explains how the Folks & Co. café portal was implemented, installed, used and operated for ICT312 Assignment 2 in 2026. It also defines practical risk, service and change-management procedures for the local demonstration. The system is a working click-and-collect prototype with simulated payments. It is not connected to a real café's point-of-sale system or payment provider.
 
-The delivered stack is HTML5, CSS3, JavaScript, PHP and MySQL-compatible MariaDB. The main entry point is `public/index.php`; PHP renders pages and validates every state-changing request. The local XAMPP installation can use three ordered phpMyAdmin SQL files or `setup-xampp.cmd`. Docker is an optional alternative. Git records source changes, and the Word files under `docs/word/` form the Part B documentation set.
+The delivered stack is HTML5, CSS3, JavaScript, PHP and MySQL-compatible MariaDB. The main entry point is `public/index.php`; PHP renders pages and validates every state-changing request. The local XAMPP installation uses one complete phpMyAdmin SQL file or `setup-xampp.cmd`. Docker is an optional alternative. Git records source changes, and the Word files under `docs/word/` form the Part B documentation set.
 
 ## Implementation structure
 
@@ -38,14 +38,14 @@ These steps apply to a default Windows XAMPP installation with PHP 8.2 or newer.
 
 1. Start Apache and MySQL in the XAMPP Control Panel.
 2. Copy the whole project to `D:\XAMPP\htdocs\cafe` on this computer (or `C:\xampp\htdocs\cafe` if XAMPP is installed there). Check that `public\index.php` exists inside the copied folder and keep the `app`, `config`, `database` and `public` folders together.
-3. Open `http://localhost/phpmyadmin/`. In its Import tab, choose `database/xampp/01-create-database.sql` and click Import. Repeat for `02-create-tables.sql` and `03-demo-data.sql`, in order. The third file adds 12 menu products and the demo staff account; re-importing does not delete orders.
-4. Open `http://localhost/cafe/public/`. Check the menu, register a customer, then sign in to the Staff desk using `staff@example.test` and password `1234567890`. Check that browser requests to `app/` and `config/` are denied by the project-root `.htaccess`.
+3. Open `http://localhost/phpmyadmin/`. In its Import tab, choose `database/xampp/cafe-portal-complete.sql` and click Import. This single file creates the database, eight tables, 12 products, three test accounts and three example orders. Re-importing does not delete orders.
+4. Open `http://localhost/cafe/public/`. Check the menu and sign in using the test accounts listed in README. Check that browser requests to `app/` and `config/` are denied by the project-root `.htaccess`.
 
 No configuration file is needed for standard XAMPP: local requests automatically use MySQL `root` with a blank password on port `3306`. If XAMPP's MySQL has a custom root password or port, copy `config/local.xampp.example.php` to `config/local.php` and edit `db_password` or `db_port`. This private file is ignored by Git. A public deployment needs its own restricted database account and security configuration.
 
-If the project was previously linked by `setup-xampp.cmd`, keep that link and its working `config/local.php`; the URL is `http://localhost/cafe/`. The command remains an alternative for a fresh installation: it creates a database-scoped account, imports the schema and menu, writes local settings and links only `public/` into `htdocs`.
+If the project was previously linked by `setup-xampp.cmd`, keep that link and its working `config/local.php`; the URL is `http://localhost/cafe/`. The command remains an alternative for a fresh installation: it creates a database-scoped account, imports the schema, menu and test accounts, writes local settings and links only `public/` into `htdocs`.
 
-For a database connection error, check that MySQL is running, that all three SQL imports completed, and that any custom `local.php` password and port match XAMPP. For a 404 page, check the copied folder and URL. If the menu is empty, repeat the third SQL import. Add Apache's port after `localhost` when it differs from port 80. Stop Apache and MySQL in the Control Panel when the local demonstration is finished.
+For a database connection error, check that MySQL is running, that the complete SQL import finished, and that any custom `local.php` password and port match XAMPP. For a 404 page, check the copied folder and URL. If the menu is empty, repeat the complete SQL import. Add Apache's port after `localhost` when it differs from port 80. Stop Apache and MySQL in the Control Panel when the local demonstration is finished.
 
 ## User manual
 
@@ -112,7 +112,7 @@ The release sequence is: log the request; assess effects; agree the acceptance t
 
 ## Handover checks
 
-The Part B handover consists of all source folders, the three ordered XAMPP SQL files, the three Word documents, and the test evidence under `docs/evidence/`. On the marker's computer, verify the install steps, menu, registration, simulated checkout, order tracking, staff queue and status update. The individual reflection and any tutor discussion record are separate assessment items.
+The Part B handover consists of all source folders, the complete XAMPP SQL file, the three Word documents, and the test evidence under `docs/evidence/`. On the marker's computer, verify the install steps, menu, registration, simulated checkout, order tracking, staff queue and status update. The individual reflection and any tutor discussion record are separate assessment items.
 
 ## References
 

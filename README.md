@@ -12,18 +12,26 @@ A complete PHP and MySQL click-and-collect student project for ICT312 Assignment
 
 1. In the **XAMPP Control Panel**, start **Apache** and **MySQL**.
 2. Put the **whole project** in XAMPP's `htdocs` folder as `cafe`. On this computer, use `D:\XAMPP\htdocs\cafe` and check that `D:\XAMPP\htdocs\cafe\public\index.php` exists. If XAMPP is installed on `C:`, use `C:\xampp\htdocs\cafe` instead. Keep the `app`, `config`, `database` and `public` folders together.
-3. Open [phpMyAdmin](http://localhost/phpmyadmin/). Select **Import**, choose [`01-create-database.sql`](database/xampp/01-create-database.sql), and click **Import** at the bottom. Repeat for [`02-create-tables.sql`](database/xampp/02-create-tables.sql), then [`03-demo-data.sql`](database/xampp/03-demo-data.sql), in that order. The files create the database, tables, menu and demo staff account.
-4. Open [http://localhost/cafe/public/](http://localhost/cafe/public/). The staff login is `staff@example.test` with password `1234567890`. You can also register a customer account.
+3. Open [phpMyAdmin](http://localhost/phpmyadmin/), select **Import**, choose [`cafe-portal-complete.sql`](database/xampp/cafe-portal-complete.sql), then click **Import** at the bottom. This one file creates the database, tables, menu and test data.
+4. Open [http://localhost/cafe/public/](http://localhost/cafe/public/) and sign in with one of the accounts below.
 
-**For a standard XAMPP installation, that is all.** The app automatically uses local MySQL user `root`, a blank password and port `3306`; you do not need to create or edit `config/local.php`. The fixed-password staff account can sign in only from the same computer. The SQL files can be re-imported without deleting existing orders.
+| Test account | Email | Password | Data to check |
+|---|---|---|---|
+| Staff | `staff@example.test` | `1234567890` | Order queue and menu management |
+| Customer one | `test.customer1@example.test` | `1234567890` | Received group order `TEST-RECEIVED-001` and cancelled order `TEST-CANCELLED-001` |
+| Customer two | `test.customer2@example.test` | `1234567890` | Ready order `TEST-READY-001` |
+
+Use customer one to check **My orders** and the group label, customer two to check that only their own order appears, and staff to move the received order through preparation, ready and collected. The cancelled example shows a simulated refund. These are fixed local demonstration accounts; the automated registration tests create additional temporary accounts as they run. The known-password staff account can sign in only from the same computer.
+
+**For a standard XAMPP installation, that is all.** The app automatically uses local MySQL user `root`, a blank password and port `3306`; you do not need to create or edit `config/local.php`. Reimporting the one SQL file keeps existing orders and resets the two test customer passwords to the values above. The numbered SQL files remain available if you want to import the components separately.
 
 If your MySQL root account has a password or MySQL uses another port, copy [`config/local.xampp.example.php`](config/local.xampp.example.php) in the same folder and rename the copy to `local.php`. Open that new file in a text editor and change only `db_password` and/or `db_port` to match XAMPP. This file is private local settings and is ignored by Git. If it already exists and the site works, leave it alone. If you used `setup-xampp.cmd` previously, it may have created an `htdocs\cafe` link; keep that link and open [http://localhost/cafe/](http://localhost/cafe/) instead of copying the project.
 
-If the page cannot connect to the database, check that MySQL is running and that all three imports showed success. If the page returns 404, check the folder path and URL. If Apache uses a custom port, add it after `localhost` (for example, `localhost:8080`). The project-root `.htaccess` prevents browser access to source folders.
+If the page cannot connect to the database, check that MySQL is running and that the SQL import showed success. If the page returns 404, check the folder path and URL. If Apache uses a custom port, add it after `localhost` (for example, `localhost:8080`). The project-root `.htaccess` prevents browser access to source folders.
 
 ### Automatic setup alternative
 
-Leave the project in its own folder, start Apache and MySQL, then double-click `setup-xampp.cmd`. It creates a database-scoped account, imports the tables and menu, sets the same demo staff credentials, writes `config/local.php`, and links only `public/` into `htdocs\cafe`. Open [http://localhost/cafe/](http://localhost/cafe/). The command detects XAMPP in `D:\XAMPP` or `C:\xampp`; set `XAMPP_ROOT` for another installation path. If XAMPP's MySQL administrator has a password, set `XAMPP_DB_ADMIN_PASSWORD` before running it. An existing `htdocs\cafe` that points elsewhere is left untouched. Repeat runs retain orders and reset the demo staff password.
+Leave the project in its own folder, start Apache and MySQL, then double-click `setup-xampp.cmd`. It creates a database-scoped account, imports the tables, menu and test data, sets the demo staff credentials, writes `config/local.php`, and links only `public/` into `htdocs\cafe`. Open [http://localhost/cafe/](http://localhost/cafe/). The command detects XAMPP in `D:\XAMPP` or `C:\xampp`; set `XAMPP_ROOT` for another installation path. If XAMPP's MySQL administrator has a password, set `XAMPP_DB_ADMIN_PASSWORD` before running it. An existing `htdocs\cafe` that points elsewhere is left untouched. Repeat runs retain orders and reset the test passwords.
 
 If Apache uses a non-default port, add that port after `localhost`. Stop the site by stopping Apache in the XAMPP Control Panel. `scripts/install.php` and `scripts/create-staff.php` remain available for Docker or other installations. XAMPP is a local development environment, not a production deployment.
 
@@ -56,14 +64,14 @@ The [design](docs/DESIGN.md), [implementation and management](docs/IMPLEMENTATIO
 
 ## Verification
 
-Use a disposable database for integration/browser tests. They create synthetic customers and orders and temporarily edit a seeded menu item.
+The imported accounts and orders above support manual test cases immediately. For the quick read-only checks, run these commands from the project folder:
 
 ```text
 php tests/domain.php
 php tests/database.php
 ```
 
-With the web server running and `TEST_STAFF_PASSWORD` set for a test staff account:
+The remaining automated tests create synthetic customers and orders and temporarily edit a menu item; use a disposable database for them. With the web server running and `TEST_STAFF_PASSWORD` set for a test staff account:
 
 ```text
 node tests/integration.mjs

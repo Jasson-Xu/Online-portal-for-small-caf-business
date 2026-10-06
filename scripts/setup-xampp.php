@@ -81,6 +81,7 @@ try {
         $stmt = $app->prepare("UPDATE users SET password_hash=? WHERE email=? AND role='staff'");
         $stmt->execute([$staffHash, $email]);
     }
+    $app->exec(file_get_contents(__DIR__ . '/../database/xampp/04-test-data.sql'));
     echo "Staff email: $email\nStaff password: $staffPassword\n";
-    echo "Database and sample menu ready. Existing orders were retained.\n";
+    echo "Database, sample menu and test accounts ready. Existing orders were retained.\n";
 } catch (PDOException $error) { setupFailure('Could not install the café tables or staff account: ' . $error->getMessage()); }

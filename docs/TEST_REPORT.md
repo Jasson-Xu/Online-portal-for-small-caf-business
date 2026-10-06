@@ -19,7 +19,7 @@ The main automated test evidence was recorded on 6 October 2026 using Windows, P
 | Database integrity | Queries over order, payment, slot, event and password records. | No broken relationship or mismatched total is found. |
 | Browser | Chrome and Edge, desktop and 320/390-pixel layouts. | Main forms work and no horizontal overflow or JavaScript error appears. |
 | Failure recovery | Full slot and injected payment-write failure in a disposable database. | No partial order and retry succeeds after recovery. |
-| Installation | XAMPP automatic setup and three manual SQL imports. | Menu and staff login work; source folders are blocked by Apache. |
+| Installation | XAMPP automatic setup and the single complete SQL import. | Menu, test accounts and staff login work; source folders are blocked by Apache. |
 
 ## Acceptance cases and traceability
 
@@ -39,7 +39,7 @@ The following cases connect the design requirements to observable outcomes. Each
 | T10 Cancellation | F6, Q2 | An eligible order is cancelled, refunded in simulation and removed from slot count. | HTTP and database passes. |
 | T11 Catalogue history | F1, F6 | Marking an item unavailable blocks new orders; old receipt prices remain. | HTTP pass. |
 | T12 Recovery | Q2 | Full slot or payment-write error leaves no partial order; retry succeeds. | Failure suite, four passes. |
-| T13 XAMPP handover | Q3 | Ordered SQL import creates 12 items and staff login; source URLs return 403. | Manual XAMPP check. |
+| T13 XAMPP handover | Q3 | Complete SQL import creates 12 items, three fixed test accounts and example orders; source URLs return 403. | Manual XAMPP check. |
 | T14 Responsive interface | Q4 | Main pages fit 320- and 390-pixel viewports in two browsers. | Browser passes. |
 
 ## Executed results
@@ -54,10 +54,10 @@ The following cases connect the design requirements to observable outcomes. Each
 | Edge browser | 23 passed | Same workflow and responsive checks in a second installed browser. |
 | Failure recovery | 4 passed | Full slot, rollback, bag retention and successful retry. |
 | XAMPP automatic setup | Passed | New account, repeat run, linked public folder and local staff login. |
-| Manual SQL import | Passed | Files imported twice; 12 items, valid staff hash and one existing order retained. |
+| Single-file SQL import | Passed | Complete file imported twice into a fresh XAMPP test database; 12 items, three fixed accounts, three orders and their payments/events remained consistent. |
 | Apache source access | Passed | `public/` returned 200; `app/`, `config/` and README requests returned 403. |
 
-The checked-in integration result is `docs/evidence/integration-results.json`; browser results are `browser-results-chrome.json` and `browser-results-msedge.json`; the failure record is `failure-results.json`. Each includes an execution time and its completed checks. Database and domain scripts print their result directly and can be rerun as described below.
+The checked-in integration result is `docs/evidence/integration-results.json`; browser results are `browser-results-chrome.json` and `browser-results-msedge.json`; the failure record is `failure-results.json`. Each includes an execution time and its completed checks. The new single-file XAMPP fixture import was checked on 7 October 2026. Database and domain scripts print their result directly and can be rerun as described below.
 
 ## Defect recording and retest
 
@@ -79,7 +79,7 @@ node tests/browser.cjs
 
 The HTTP suite needs `TEST_STAFF_PASSWORD` for a staff account in that disposable database. Browser checks need Playwright and Chrome or Edge; see README for the optional runtime settings. The failure suite temporarily installs a payment-failure database trigger and changes one test slot. It removes them after completion, but an interrupted run requires inspection before reuse. Never run mutation suites against real café orders.
 
-To repeat the manual XAMPP check, import the three numbered files under `database/xampp/` in phpMyAdmin and open the menu and Staff desk. Standard XAMPP needs no `config/local.php`; create it from `config/local.xampp.example.php` only for a custom MySQL password or port. Request a source path such as `/cafe/app/actions.php` from a full-folder installation; it should return 403. Test both customer and staff sign-in after any change to account setup.
+To repeat the manual XAMPP check, import `database/xampp/cafe-portal-complete.sql` in phpMyAdmin and open the menu, My orders and Staff desk. Sign in with the three fixed accounts listed in README and confirm that each customer sees only their own example orders. Standard XAMPP needs no `config/local.php`; create it from `config/local.xampp.example.php` only for a custom MySQL password or port. Request a source path such as `/cafe/app/actions.php` from a full-folder installation; it should return 403.
 
 ## Coverage limits
 
