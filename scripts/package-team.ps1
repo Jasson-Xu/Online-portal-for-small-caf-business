@@ -23,32 +23,43 @@ try {
     if ($duplicates.Count -or $missing.Count -or $untracked.Count) {
         throw "Package assignment is incomplete. Duplicate: $($duplicates.Name -join ', '); unassigned: $($missing -join ', '); not tracked: $($untracked -join ', ')."
     }
+    git diff --quiet HEAD --
+    if ($LASTEXITCODE -ne 0) { throw 'Commit tracked changes before packaging so every ZIP uses the same Git revision.' }
     $commit = (git rev-parse --short HEAD).Trim()
-    foreach ($member in $groups.Keys) {
-        $archivePath = Join-Path $output ("Folks-Cafe-Portal-{0}.zip" -f $member)
-        $stream = [System.IO.File]::Open($archivePath,[System.IO.FileMode]::Create)
-        try {
-            $archive = New-Object System.IO.Compression.ZipArchive($stream,[System.IO.Compression.ZipArchiveMode]::Create,$false)
+    $sourceArchivePath = Join-Path $output 'Folks-Cafe-Portal-Source.zip'
+    & git archive --format=zip --prefix=Folks-Cafe-Portal/ "--output=$sourceArchivePath" HEAD
+    if ($LASTEXITCODE -ne 0) { throw 'Unable to build the complete source ZIP from Git.' }
+    $sourceArchive = [System.IO.Compression.ZipFile]::OpenRead($sourceArchivePath)
+    try {
+        foreach ($member in $groups.Keys) {
+            $archivePath = Join-Path $output ("Folks-Cafe-Portal-{0}.zip" -f $member)
+            $stream = [System.IO.File]::Open($archivePath,[System.IO.FileMode]::Create)
             try {
-                foreach ($file in $groups[$member]) {
-                    $full = [System.IO.Path]::GetFullPath((Join-Path $project $file))
-                    if (-not $full.StartsWith($project + [System.IO.Path]::DirectorySeparatorChar,[System.StringComparison]::OrdinalIgnoreCase)) { throw "Invalid package path: $file" }
-                    if (-not [System.IO.File]::Exists($full)) { throw "Missing source file: $file" }
-                    $entryName = 'Folks-Cafe-Portal/' + $file.Replace('\','/')
-                    [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive,$full,$entryName,[System.IO.Compression.CompressionLevel]::Optimal) | Out-Null
-                }
-                $readme = $archive.CreateEntry('Folks-Cafe-Portal/PACKAGE-' + $member + '.txt')
-                $writer = New-Object System.IO.StreamWriter($readme.Open())
+                $archive = New-Object System.IO.Compression.ZipArchive($stream,[System.IO.Compression.ZipArchiveMode]::Create,$false)
                 try {
-                    $writer.WriteLine("Assigned component package: $member")
-                    $writer.WriteLine("Source revision: $commit")
-                    $writer.WriteLine('This is a proposed work allocation, not evidence of individual authorship.')
-                    $writer.WriteLine('Extract all three ZIPs into the same destination to form the runnable project.')
-                    $writer.WriteLine('Then follow README.md for database setup and staff account creation.')
-                    $writer.WriteLine('No local database password, runtime data or Git history is included.')
-                } finally { $writer.Dispose() }
-            } finally { $archive.Dispose() }
-        } finally { $stream.Dispose() }
-        Write-Output ("{0}: {1} assigned source files -> {2}" -f $member,$groups[$member].Count,$archivePath)
-    }
+                    foreach ($file in $groups[$member]) {
+                        $entryName = 'Folks-Cafe-Portal/' + $file.Replace('\','/')
+                        $sourceEntry = $sourceArchive.GetEntry($entryName)
+                        if (-not $sourceEntry) { throw "Missing committed source file: $file" }
+                        $destinationEntry = $archive.CreateEntry($entryName,[System.IO.Compression.CompressionLevel]::Optimal)
+                        $sourceStream = $sourceEntry.Open()
+                        $destinationStream = $destinationEntry.Open()
+                        try { $sourceStream.CopyTo($destinationStream) }
+                        finally { $destinationStream.Dispose(); $sourceStream.Dispose() }
+                    }
+                    $readme = $archive.CreateEntry('Folks-Cafe-Portal/PACKAGE-' + $member + '.txt')
+                    $writer = New-Object System.IO.StreamWriter($readme.Open())
+                    try {
+                        $writer.WriteLine("Assigned component package: $member")
+                        $writer.WriteLine("Source revision: $commit")
+                        $writer.WriteLine('This is a proposed work allocation, not evidence of individual authorship.')
+                        $writer.WriteLine('Extract all three ZIPs into the same destination to form the runnable project.')
+                        $writer.WriteLine('Then follow README.md for database setup and staff account creation.')
+                        $writer.WriteLine('No local database password, runtime data or Git history is included.')
+                    } finally { $writer.Dispose() }
+                } finally { $archive.Dispose() }
+            } finally { $stream.Dispose() }
+            Write-Output ("{0}: {1} assigned source files -> {2}" -f $member,$groups[$member].Count,$archivePath)
+        }
+    } finally { $sourceArchive.Dispose() }
 } finally { Pop-Location }
