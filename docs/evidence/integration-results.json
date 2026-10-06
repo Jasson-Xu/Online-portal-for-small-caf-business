@@ -1,0 +1,202 @@
+{
+  "executedAt": "2026-10-06T07:50:07.552Z",
+  "base": "http://127.0.0.1:8080/",
+  "customerEmail": "customer-1791273004905@example.test",
+  "reference": "FG-FF43583B98",
+  "cancelledRef": "FG-621EC5099A",
+  "passed": 48,
+  "results": [
+    {
+      "name": "Home and security headers",
+      "status": "passed"
+    },
+    {
+      "name": "Anonymous staff access redirects to sign-in",
+      "status": "passed"
+    },
+    {
+      "name": "Unknown page returns 404",
+      "status": "passed"
+    },
+    {
+      "name": "Seeded menu is served from database",
+      "status": "passed"
+    },
+    {
+      "name": "Category filtering",
+      "status": "passed"
+    },
+    {
+      "name": "Empty search state",
+      "status": "passed"
+    },
+    {
+      "name": "CSRF forgery rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Zero quantity rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Unknown product rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Group item added",
+      "status": "passed"
+    },
+    {
+      "name": "Cart totals and escaped preparation notes",
+      "status": "passed"
+    },
+    {
+      "name": "Quantity updated",
+      "status": "passed"
+    },
+    {
+      "name": "Updated cart total",
+      "status": "passed"
+    },
+    {
+      "name": "Cart removal and empty state",
+      "status": "passed"
+    },
+    {
+      "name": "Invalid email rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Weak password rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Customer registered",
+      "status": "passed"
+    },
+    {
+      "name": "Customer cannot access staff or choose a staff role",
+      "status": "passed"
+    },
+    {
+      "name": "Customer cannot mutate staff menu",
+      "status": "passed"
+    },
+    {
+      "name": "Checkout requires no card details",
+      "status": "passed"
+    },
+    {
+      "name": "Invalid phone rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Past collection rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Missing simulation acknowledgment rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Declined simulated payment rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Declined payment creates no order",
+      "status": "passed"
+    },
+    {
+      "name": "Altered total rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Approved checkout persists an order",
+      "status": "passed"
+    },
+    {
+      "name": "Checkout replay returns the original order",
+      "status": "passed"
+    },
+    {
+      "name": "Receipt contains correct totals and group details",
+      "status": "passed"
+    },
+    {
+      "name": "Successful order clears bag",
+      "status": "passed"
+    },
+    {
+      "name": "Another customer cannot read the order",
+      "status": "passed"
+    },
+    {
+      "name": "SQL injection sign-in rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Staff login",
+      "status": "passed"
+    },
+    {
+      "name": "Staff sees customer order",
+      "status": "passed"
+    },
+    {
+      "name": "Skipping preparation states rejected",
+      "status": "passed"
+    },
+    {
+      "name": "Staff advances order to preparing",
+      "status": "passed"
+    },
+    {
+      "name": "Staff advances order to ready",
+      "status": "passed"
+    },
+    {
+      "name": "Staff advances order to collected",
+      "status": "passed"
+    },
+    {
+      "name": "Completed order cannot be cancelled",
+      "status": "passed"
+    },
+    {
+      "name": "Customer tracking reflects collected status",
+      "status": "passed"
+    },
+    {
+      "name": "Cancellation succeeds",
+      "status": "passed"
+    },
+    {
+      "name": "Cancellation records simulated refund",
+      "status": "passed"
+    },
+    {
+      "name": "Staff edits catalogue",
+      "status": "passed"
+    },
+    {
+      "name": "Sold-out item shown",
+      "status": "passed"
+    },
+    {
+      "name": "Sold-out item cannot be ordered",
+      "status": "passed"
+    },
+    {
+      "name": "Historical order keeps original price",
+      "status": "passed"
+    },
+    {
+      "name": "Logout removes account access",
+      "status": "passed"
+    },
+    {
+      "name": "Database-backed login rate limit",
+      "status": "passed"
+    }
+  ]
+}

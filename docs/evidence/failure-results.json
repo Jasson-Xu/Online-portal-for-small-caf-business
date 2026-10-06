@@ -1,0 +1,9 @@
+{
+  "executedAt": "2026-10-06T07:56:36.748Z",
+  "checks": [
+    "Full slot rejects the order without partial writes",
+    "Payment storage failure rolls back order, lines, audit and capacity",
+    "Failed transaction retains customer bag",
+    "Same checkout can succeed after failure recovery"
+  ]
+}

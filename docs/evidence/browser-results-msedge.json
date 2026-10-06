@@ -1,0 +1,29 @@
+{
+  "executedAt": "2026-10-06T07:58:23.415Z",
+  "browser": "msedge",
+  "checks": [
+    "desktop home fits viewport",
+    "12 menu cards visible",
+    "category navigation",
+    "interactive group ordering",
+    "browser checkout and confirmation",
+    "390px home fits viewport",
+    "390px menu fits viewport",
+    "390px orders fits viewport",
+    "390px cart fits viewport",
+    "390px login fits viewport",
+    "390px register fits viewport",
+    "390px privacy fits viewport",
+    "320px home fits viewport",
+    "320px menu fits viewport",
+    "320px orders fits viewport",
+    "320px cart fits viewport",
+    "320px login fits viewport",
+    "320px register fits viewport",
+    "320px privacy fits viewport",
+    "staff browser login",
+    "mobile staff fits viewport",
+    "mobile menu management fits viewport",
+    "no JavaScript errors"
+  ]
+}
