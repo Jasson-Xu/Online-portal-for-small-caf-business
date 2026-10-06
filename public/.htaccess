@@ -1,0 +1,3 @@
+# Override the parent project directory's access rule for the web entry point.
+Require all granted
+Options -Indexes

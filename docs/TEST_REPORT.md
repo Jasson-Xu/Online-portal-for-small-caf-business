@@ -14,10 +14,13 @@ Execution date: 6 October 2026. Environment: Windows, PHP 8.4.0, MySQL 9.1.0, lo
 | Browser workflow in Edge | 23 passed | Same browser workflow and responsive checks in a second installed browser |
 | Failure recovery | 4 passed | Full collection slot, payment-storage rollback, preserved cart and recovery |
 | XAMPP installation | Passed | PHP 8.2 and MariaDB 10.4, fresh dedicated database user, repeat setup, Apache junction, home/menu/CSS via `/cafe/` |
+| Manual XAMPP SQL import | Passed | Three ordered SQL files imported through XAMPP MariaDB; 12 menu items and bcrypt staff password verified; existing order retained; manual Apache layout served `public/` and denied source files |
 
 The browser checks detect horizontal overflow and exercise a real order. Screenshots were also inspected for visual layout. They are not a claim of formal accessibility certification. Firefox, Safari, physical phones, a public HTTPS deployment, Docker startup and MySQL 8.4 were not executed in this environment. The installation options must be rehearsed on the actual marker's machine.
 
 The XAMPP setup was also exercised on the installed Windows XAMPP stack. A clean setup created a dedicated application account; a repeat run retained existing records. Apache served the linked public folder at `/cafe/` with HTTP 200 for the home page, menu and stylesheet. The local demo staff password was reset to the requested value on setup; HTTP sign-in reached the Staff desk, and the previous password was rejected. A custom XAMPP location or administrator password was not exercised.
+
+The manual import SQL was run twice in order against the existing XAMPP database: all 12 sample items were present, the demo staff hash verified against the documented password, and the existing order count remained one. A temporary project-root link under `htdocs` checked the documented manual layout: `public/` returned HTTP 200 while `app/actions.php`, `config/config.php`, and `README.md` returned HTTP 403. The temporary link was removed after the check. A clean phpMyAdmin browser import on another computer has not been rehearsed.
 
 ## Representative acceptance cases
 

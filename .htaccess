@@ -1,0 +1,3 @@
+# When the full project is copied into htdocs for manual XAMPP setup,
+# only the public/ directory may be requested by a browser.
+Require all denied

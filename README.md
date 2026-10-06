@@ -8,17 +8,20 @@ A complete PHP and MySQL click-and-collect student project for ICT312 Assignment
 - A modern browser. Node.js 20+ is needed only for optional integration tests.
 - No Composer, npm build, internet assets or framework is required to run the app.
 
-## Start locally with XAMPP
+## Start locally with XAMPP: phpMyAdmin import
 
-1. In the **XAMPP Control Panel**, start **Apache** and **MySQL**. Leave the café project in its own folder; it does not need to be copied into `htdocs`.
-2. From the project folder, double-click `setup-xampp.cmd`. Alternatively, in PowerShell run `powershell -ExecutionPolicy Bypass -File .\scripts\setup-xampp.ps1`. The setup detects XAMPP in `D:\XAMPP` or `C:\xampp`. If yours is elsewhere, set `XAMPP_ROOT` to its installation folder.
-3. Open **[http://localhost/cafe/](http://localhost/cafe/)**. Register a customer account or sign in with the local demo staff account: `staff@example.test` / `1234567890`.
+1. Copy the **whole project folder** into XAMPP's `htdocs` folder and name it `cafe` (for example, `C:\xampp\htdocs\cafe`). Keep `app`, `config`, `database`, `public`, and the other folders together. If `htdocs\cafe` is already a link to this project's `public/` from the earlier setup, keep that link and skip the copy.
+2. In the **XAMPP Control Panel**, start **Apache** and **MySQL**. Open [phpMyAdmin](http://localhost/phpmyadmin/), choose **Import**, and import these files **one at a time, in order**: [`01-create-database.sql`](database/xampp/01-create-database.sql), [`02-create-tables.sql`](database/xampp/02-create-tables.sql), [`03-demo-data.sql`](database/xampp/03-demo-data.sql). The files create `cafe_portal`, its tables, the sample menu, and the demo staff account. They do not delete existing orders if imported again.
+3. If `config/local.php` does not already exist, copy `config/local.xampp.example.php` to `config/local.php`. A default local XAMPP installation uses MySQL user `root` with a blank password. If you set a MySQL root password or changed port 3306, edit those two values in `config/local.php`. Keep an existing working `config/local.php` from automatic setup.
+4. Open [http://localhost/cafe/public/](http://localhost/cafe/public/). Register a customer account or sign in as staff with `staff@example.test` / `1234567890`. The project-root `.htaccess` blocks browser access to the source folders; `public/` is the website. If you are using the earlier `setup-xampp.cmd` link, the URL remains [http://localhost/cafe/](http://localhost/cafe/), and its existing `config/local.php` may be kept.
 
-Setup creates the café database, an account limited to that database, the tables, sample menu and a staff account. It writes its database settings to ignored `config/local.php` and links **only `public/`** into XAMPP's `htdocs` folder. An existing `htdocs/cafe` that points elsewhere is left untouched. Existing orders are retained on repeat runs; the demo staff password is set to `1234567890` each time. The known-password demo staff account can sign in only from the same computer. If prior local database settings need replacing, setup backs them up under ignored `var/`. No extra Apache configuration or PHP development server is needed.
+This manual path uses phpMyAdmin and the three SQL files, without running a PHP installer. The known-password demo staff account can sign in only from the same computer. Keep `config/local.php` private and never commit it. If `staff@example.test` already belongs to a customer, the SQL leaves that customer unchanged; use a fresh database or change that customer email before importing the demo data.
 
-If XAMPP's MySQL administrator has a password, set `XAMPP_DB_ADMIN_PASSWORD` in PowerShell before running setup, then remove it from the environment afterwards. The default database port is 3306; set `XAMPP_DB_PORT` if you deliberately changed XAMPP's port. If Apache is on a non-default port, open `http://localhost:<port>/cafe/`. To stop the site, stop Apache in the XAMPP Control Panel. The project link and data stay in place for the next start.
+### Automatic setup alternative
 
-`scripts/install.php` and `scripts/create-staff.php` remain available for manual or Docker installations. Never commit `config/local.php` or serve the project root directly from Apache. XAMPP is a local development environment, not a production deployment.
+Leave the project in its own folder, start Apache and MySQL, then double-click `setup-xampp.cmd`. It creates a database-scoped account, imports the tables and menu, sets the same demo staff credentials, writes `config/local.php`, and links only `public/` into `htdocs\cafe`. Open [http://localhost/cafe/](http://localhost/cafe/). The command detects XAMPP in `D:\XAMPP` or `C:\xampp`; set `XAMPP_ROOT` for another installation path. If XAMPP's MySQL administrator has a password, set `XAMPP_DB_ADMIN_PASSWORD` before running it. An existing `htdocs\cafe` that points elsewhere is left untouched. Repeat runs retain orders and reset the demo staff password.
+
+If Apache uses a non-default port, add that port after `localhost`. Stop the site by stopping Apache in the XAMPP Control Panel. `scripts/install.php` and `scripts/create-staff.php` remain available for Docker or other installations. XAMPP is a local development environment, not a production deployment.
 
 ## Docker alternative
 
