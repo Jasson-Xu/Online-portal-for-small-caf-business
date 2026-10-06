@@ -29,20 +29,20 @@ Effort points are estimates of relative complexity, not hours already worked. Al
 
 ## Requested calendar buckets
 
-The user specified August 17 to October 6 without confirming the year. The brief filename contains 2025, but the local implementation session occurred on October 6, 2026. This table deliberately leaves the year unspecified. Eight calendar buckets cannot honestly be relabelled as ten complete teaching weeks.
+The requested checkpoints begin August 20 and continue weekly through October 1, with October 6 as the final review. The year was not confirmed. The brief filename contains 2025, but the local implementation session occurred on October 6, 2026. This table deliberately leaves the year unspecified. These dates are a plan, not historical activity or commit dates. Eight calendar buckets cannot honestly be relabelled as ten complete teaching weeks.
 
 | Planning bucket | Date range | Proposed milestone | Jasson | Mandip Rijal | Rudesh |
 |---|---|---|---|---|---|
-| 1 | Aug 17–23 | Scope and architecture | Journeys and layout | Data model | Staff requirements and tests |
-| 2 | Aug 24–30 | Foundation | Home and navigation | Schema and setup | Queue structure |
-| 3 | Aug 31–Sep 6 | Catalogue and access | Menu/filter/search | Registration and sessions | Role checks |
-| 4 | Sep 7–13 | Group ordering | Bag and recipient labels | Server validation | Menu management |
-| 5 | Sep 14–20 | Checkout | Collection/payment UI | Atomic order placement | Preparation workflow |
-| 6 | Sep 21–27 | Integrated service | Receipts and tracking | Integrity and replay checks | Cancellation and refunds |
-| 7 | Sep 28–Oct 4 | Review and handover | Responsive review | Security/install review | Regression and manuals |
-| 8 | Oct 5–6 | Final review | Presentation coordination | Database verification | Package checks |
+| 1 | Aug 20–26 | Scope and architecture | Journeys and layout | Data model | Staff requirements and tests |
+| 2 | Aug 27–Sep 2 | Foundation | Home and navigation | Schema and setup | Queue structure |
+| 3 | Sep 3–9 | Catalogue and access | Menu/filter/search | Registration and sessions | Role checks |
+| 4 | Sep 10–16 | Group ordering | Bag and recipient labels | Server validation | Menu management |
+| 5 | Sep 17–23 | Checkout | Collection/payment UI | Atomic order placement | Preparation workflow |
+| 6 | Sep 24–30 | Integrated service | Receipts and tracking | Integrity and replay checks | Cancellation and refunds |
+| 7 | Oct 1–5 | Review and handover | Responsive review | Security/install review | Regression and manuals |
+| 8 | Oct 6 | Final review | Presentation coordination | Database verification | Package checks |
 
-The last bucket is only two days, so it is reserved for review rather than an equal development workload. Keep actual commit timestamps. Use meaningful commits as work is completed; do not invent authorship, tutor meetings or contribution evidence.
+The last bucket is one day, so it is reserved for review rather than an equal development workload. Keep actual commit timestamps. Use meaningful commits as work is completed; do not invent authorship, tutor meetings or contribution evidence.
 
 ## Weekly record template
 

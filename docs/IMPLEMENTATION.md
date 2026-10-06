@@ -2,7 +2,7 @@
 
 ## Scope and architecture
 
-The prototype implements Proposal-1 with the required HTML5, CSS3, JavaScript, PHP and MySQL stack. A server-rendered multi-page interface avoids a separate front-end build. `public/index.php` routes page requests; `app/actions.php` validates mutations; `app/views.php` renders escaped HTML; `app/domain.php` contains quantity, collection-time and status rules. `app/bootstrap.php` supplies sessions, database access and helpers. Only `public/` is web-accessible.
+The prototype implements Proposal-1 with the required HTML5, CSS3, JavaScript, PHP and MySQL stack. A server-rendered multi-page interface avoids a separate front-end build. `public/index.php` routes page requests; `app/actions.php` validates customer mutations and delegates staff changes to `app/staff_actions.php`; `app/views.php` renders customer pages and delegates staff pages to `app/staff_views.php`. `app/domain.php` contains quantity, collection-time and status rules. `app/bootstrap.php` supplies sessions, database access and helpers. Only `public/` is web-accessible.
 
 ```mermaid
 flowchart LR

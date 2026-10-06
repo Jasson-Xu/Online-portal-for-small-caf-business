@@ -87,6 +87,8 @@ See [test evidence](docs/TEST_REPORT.md) for the executed results and limits. Do
 
 - [Implementation and operating guide](docs/IMPLEMENTATION.md)
 - [Three-person allocation and weekly plan](docs/TEAM_PLAN.md)
+- [Weekly checkpoints from August 20](docs/WEEKLY_CHECKPOINTS.md)
+- Run `powershell -File scripts/package-team.ps1` to produce three assigned-component ZIPs in `dist/`. Extract all three into the same folder for a complete working project. ZIP labels are proposed responsibilities and do not establish individual authorship.
 - The source ZIP is in `dist/`. Word deliverables and the individual reflection were deferred at the user's request.
 - Jasson: customer interface, accessibility and coordination. Mandip Rijal: accounts, data and checkout. Rudesh: staff operations, verification and handover. Each proposed allocation is 40 effort points; actual contributions must be recorded by the people involved.
 
