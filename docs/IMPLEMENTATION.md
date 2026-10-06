@@ -49,6 +49,8 @@ Staff sign in through the same page. The Staff desk shows counts and up to 100 m
 
 Passwords use PHP `password_hash` and `password_verify`; registration never accepts a staff role. Login rotates the session ID. Cookies are HttpOnly and SameSite=Lax; enable secure cookies over HTTPS. Mutating forms use a session CSRF token. User data is HTML-escaped. Order reads check account ownership; staff actions verify the role on the server. Sign-in allows ten attempts per email in a 15-minute window across sessions.
 
+The XAMPP installation creates a local demonstration staff account with the requested fixed password. Its account is limited to sign-in requests from the same computer. Other installations can provision staff through the CLI with a unique password.
+
 Only operational account/order data is collected. There are no payment-card fields, marketing trackers or external asset calls. The privacy page explains purpose, session cookies and simulated payment. Customer deletion requires operator handling; no email verification or password reset is implemented. Staff provisioning is CLI-only. Public production use requires HTTPS, real operational contact details, appropriate retention rules, supported runtime patching and a further security review. These are deployment prerequisites, not a claim of legal certification.
 
 ## Methodology and design decisions

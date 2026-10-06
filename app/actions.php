@@ -33,6 +33,11 @@ function handle_action(): void {
         $fallback = '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.';
         $valid = password_verify($password, $user['password_hash'] ?? $fallback);
         if (!$user || !$valid) throw new DomainException('Email or password is incorrect.');
+        global $config;
+        if (($config['demo_staff_local_only'] ?? false) && $user['role'] === 'staff' && $user['email'] === 'staff@example.test'
+            && !in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1'], true)) {
+            throw new DomainException('The local demo staff account can only sign in on this computer.');
+        }
         query('DELETE FROM login_attempts WHERE identity_hash=?', [$identity]);
         session_regenerate_id(true);
         $_SESSION['user_id'] = (int)$user['id'];

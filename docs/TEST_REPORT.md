@@ -17,7 +17,7 @@ Execution date: 6 October 2026. Environment: Windows, PHP 8.4.0, MySQL 9.1.0, lo
 
 The browser checks detect horizontal overflow and exercise a real order. Screenshots were also inspected for visual layout. They are not a claim of formal accessibility certification. Firefox, Safari, physical phones, a public HTTPS deployment, Docker startup and MySQL 8.4 were not executed in this environment. The installation options must be rehearsed on the actual marker's machine.
 
-The XAMPP setup was also exercised on the installed Windows XAMPP stack. A clean setup created a dedicated application account; a repeat run retained existing records and staff credentials. Apache served the linked public folder at `/cafe/` with HTTP 200 for the home page, menu and stylesheet. Temporary Apache and MariaDB processes were stopped after verification. A custom XAMPP location or administrator password was not exercised.
+The XAMPP setup was also exercised on the installed Windows XAMPP stack. A clean setup created a dedicated application account; a repeat run retained existing records. Apache served the linked public folder at `/cafe/` with HTTP 200 for the home page, menu and stylesheet. The local demo staff password was reset to the requested value on setup; HTTP sign-in reached the Staff desk, and the previous password was rejected. A custom XAMPP location or administrator password was not exercised.
 
 ## Representative acceptance cases
 

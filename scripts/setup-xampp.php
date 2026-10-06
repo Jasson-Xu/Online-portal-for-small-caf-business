@@ -49,12 +49,20 @@ if (!$reuse) {
         'db_user' => $appUser,
         'db_password' => $appPassword,
         'session_secure' => false,
+        'demo_staff_local_only' => true,
     ];
     $contents = "<?php\nreturn " . var_export($settings, true) . ";\n";
     if (file_put_contents($localPath, $contents, LOCK_EX) === false) setupFailure('Could not write config/local.php.');
     echo "Created a dedicated café database account.\n";
 } else {
     echo "Using the existing café database account.\n";
+    if (($settings['demo_staff_local_only'] ?? false) !== true) {
+        $backup = __DIR__ . '/../var/local-config-before-xampp-' . date('Ymd-His') . '-' . bin2hex(random_bytes(3)) . '.php';
+        if (!copy($localPath, $backup)) setupFailure('Could not back up the existing local database settings.');
+        $settings['demo_staff_local_only'] = true;
+        if (file_put_contents($localPath, "<?php\nreturn " . var_export($settings, true) . ";\n", LOCK_EX) === false) setupFailure('Could not update config/local.php.');
+        echo "Enabled local-only access for the demo staff account.\n";
+    }
 }
 
 try {
@@ -64,13 +72,15 @@ try {
     $stmt->execute([$email]);
     $existingStaff = $stmt->fetch();
     if ($existingStaff && $existingStaff['role'] !== 'staff') setupFailure('staff@example.test belongs to a customer. Choose a different staff email with scripts/create-staff.php.');
+    $staffPassword = '1234567890';
+    $staffHash = password_hash($staffPassword, PASSWORD_DEFAULT);
     if (!$existingStaff) {
-        $staffPassword = 'Cafe-' . bin2hex(random_bytes(12));
         $stmt = $app->prepare("INSERT INTO users (name,email,password_hash,role) VALUES (?,?,?,'staff')");
-        $stmt->execute(['Cafe staff', $email, password_hash($staffPassword, PASSWORD_DEFAULT)]);
-        echo "Staff email: $email\nStaff password: $staffPassword\nSave this password; it is shown only now.\n";
+        $stmt->execute(['Cafe staff', $email, $staffHash]);
     } else {
-        echo "Existing staff email: $email (password unchanged).\n";
+        $stmt = $app->prepare("UPDATE users SET password_hash=? WHERE email=? AND role='staff'");
+        $stmt->execute([$staffHash, $email]);
     }
+    echo "Staff email: $email\nStaff password: $staffPassword\n";
     echo "Database and sample menu ready. Existing orders were retained.\n";
 } catch (PDOException $error) { setupFailure('Could not install the café tables or staff account: ' . $error->getMessage()); }
